@@ -8,6 +8,7 @@ RewriteRule ^admin/?$ admin.html [L]
     Require all denied
 </FilesMatch>
 RedirectMatch 404 ^/(herramientas|data)(/|$)
+RedirectMatch 404 /\.git(/|$)
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"

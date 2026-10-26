@@ -60,8 +60,8 @@ Sirve cualquier servidor con Node y disco persistente para `data/`. Debe estar d
 1. En hPanel, crea el subdominio (por ejemplo `elijo.fb-soluciones.com`) y añade una app Node.js sobre él, subiendo `elijo-hostinger.zip` o conectando el repositorio de GitHub. Comando de inicio: `npm start`.
 2. Define estas variables de entorno en el panel de la app:
    - `DATA_DIR`: una carpeta fuera del despliegue, por ejemplo `/home/<usuario>/elijo-datos`. Hostinger sobrescribe la carpeta de la app en cada despliegue; sin esta variable se pierde lo publicado.
-   - `ELIJO_ADMIN_USUARIO` y `ELIJO_ADMIN_CLAVE` (mínimo 10 caracteres): crean el primer administrador al arrancar, solo si no existe ninguno.
-3. Abre `/admin`, entra y cambia la clave desde "Cambiar mi clave". Después borra `ELIJO_ADMIN_CLAVE` del panel.
+   - `ELIJO_SETUP_TOKEN`: un código de un solo uso (8 caracteres o más). Mientras no exista administradora, `/admin` muestra un formulario donde ella misma crea su usuario y su clave escribiendo ese código. Alternativa sin formulario: `ELIJO_ADMIN_USUARIO` y `ELIJO_ADMIN_CLAVE` (mínimo 10 caracteres) crean la administradora al arrancar.
+3. Abre `/admin`, crea la administradora con el código y, una vez dentro, borra `ELIJO_SETUP_TOKEN` del panel de Hostinger.
 4. Comprueba la persistencia: publica un cambio, vuelve a desplegar y verifica que el cambio sigue ahí.
 
 ## Pruebas

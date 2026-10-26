@@ -14,6 +14,20 @@ let fallos = 0;
 const ok = (nombre, cond) => { console.log((cond ? 'ok   ' : 'FALLA ') + nombre); if (!cond) fallos++; };
 
 (async () => {
+  // Primero, configuración inicial desde el navegador (sin administradora, con código).
+  const envSetup = { ...env, ELIJO_SETUP_TOKEN: 'codigo-de-prueba-123', PORT: '3112' };
+  const srvSetup = spawn('node', [path.join(raiz, 'server.js')], { env: envSetup, stdio: 'ignore' });
+  try {
+    for (let i = 0; i < 40; i++) { try { await fetch('http://localhost:3112/api/admin/estado'); break; } catch (e) { await new Promise(r => setTimeout(r, 150)); } }
+    const J0 = { 'Content-Type': 'application/json', 'X-Requested-With': 'elijo' };
+    const est = await (await fetch('http://localhost:3112/api/admin/estado')).json();
+    ok('sin administradora y con código, la configuración inicial está disponible', est.hayAdmin === false && est.configurar === true);
+    ok('código incorrecto se rechaza', (await fetch('http://localhost:3112/api/admin/configurar', { method: 'POST', headers: J0, body: JSON.stringify({ token: 'otro', usuario: 'ana', clave: 'clave-larga-123' }) })).status === 401);
+    ok('clave corta se rechaza', (await fetch('http://localhost:3112/api/admin/configurar', { method: 'POST', headers: J0, body: JSON.stringify({ token: 'codigo-de-prueba-123', usuario: 'ana', clave: 'corta' }) })).status === 400);
+    ok('con el código se crea la administradora', (await fetch('http://localhost:3112/api/admin/configurar', { method: 'POST', headers: J0, body: JSON.stringify({ token: 'codigo-de-prueba-123', usuario: 'ana', clave: 'clave-larga-123' }) })).status === 200);
+    ok('ya creada, la configuración inicial se cierra', (await (await fetch('http://localhost:3112/api/admin/estado')).json()).configurar === false);
+  } finally { srvSetup.kill(); }
+  fs.rmSync(path.join(datos, 'admin.json'), { force: true });
   execFileSync('node', [path.join(raiz, 'herramientas', 'crear-admin.js'), 'prueba'], { env, stdio: 'ignore' });
   const srv = spawn('node', [path.join(raiz, 'server.js')], { env, stdio: 'ignore' });
   try {

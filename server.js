@@ -113,13 +113,30 @@ app.get('/contenido.inicial.json', (req, res) => res.sendFile(SEMILLA));
 
 app.post('/api/admin/entrar', frenar, (req, res) => {
   const { usuario, clave } = req.body || {};
-  if (!seg.leerAdmin()) return res.status(503).json({ error: 'Aún no hay administrador. Ejecuta: npm run crear-admin' });
+  if (!seg.leerAdmin()) return res.status(503).json({ error: 'Aún no hay administradora. Configúrala desde esta misma pantalla o con: npm run crear-admin' });
   if (!seg.verificar(usuario, clave)) { req.intento.n++; return res.status(401).json({ error: 'Usuario o clave incorrectos.' }); }
   req.intento.n = 0;
   ponerCookie(req, res, seg.crearSesion(usuario), seg.HORAS_SESION * 3600);
   res.json({ usuario });
 });
 app.post('/api/admin/salir', (req, res) => { ponerCookie(req, res, '', 0); res.json({}); });
+// Configuración inicial sin terminal: con ELIJO_SETUP_TOKEN definido y sin administrador, la propia
+// administradora crea su usuario y su clave desde /admin usando ese código de un solo uso.
+const crypto = require('crypto');
+const tokenSetup = () => (process.env.ELIJO_SETUP_TOKEN || '').trim();
+const setupDisponible = () => !seg.leerAdmin() && tokenSetup().length >= 8;
+app.get('/api/admin/estado', (req, res) => res.json({ hayAdmin: !!seg.leerAdmin(), configurar: setupDisponible() }));
+app.post('/api/admin/configurar', frenar, (req, res) => {
+  if (!setupDisponible()) return res.status(409).json({ error: 'La configuración inicial no está disponible.' });
+  const { token, usuario, clave } = req.body || {};
+  const t = Buffer.from(String(token || '')), e = Buffer.from(tokenSetup());
+  if (t.length !== e.length || !crypto.timingSafeEqual(t, e)) { req.intento.n++; return res.status(401).json({ error: 'El código de configuración no coincide.' }); }
+  if (typeof usuario !== 'string' || !/^[a-z0-9._-]{3,32}$/i.test(usuario)) return res.status(400).json({ error: 'El usuario debe tener de 3 a 32 letras, números, puntos o guiones.' });
+  if (typeof clave !== 'string' || clave.length < 10 || clave.length > 100) return res.status(400).json({ error: 'La clave debe tener al menos 10 caracteres.' });
+  seg.guardarAdmin(usuario, clave);
+  ponerCookie(req, res, seg.crearSesion(usuario), seg.HORAS_SESION * 3600);
+  res.json({ usuario });
+});
 app.get('/api/admin/sesion', (req, res) => {
   const s = sesion(req);
   s ? res.json({ usuario: s.u }) : res.status(401).json({ error: 'Sin sesión.' });

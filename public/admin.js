@@ -56,6 +56,16 @@ function vistaRegistro() {
     <label>Datos para copiar a una hoja de cálculo (CSV)<textarea rows="5" readonly>${esc(csvRegistro())}</textarea></label>`;
 }
 
+function vistaConfigurar(mensaje) {
+  $('#admin').innerHTML = `<form class="panel stack entrada" id="f-configurar"><span class="brand">Elijo</span><h2>Configuración inicial</h2>
+    <p class="small muted">Aún no hay administradora. Crea tu usuario y tu clave. El código de configuración lo define quien instaló la app.</p>
+    ${mensaje ? `<p class="errores">${esc(mensaje)}</p>` : ''}
+    <label>Código de configuración<input type="text" id="s-token" autocomplete="off" required></label>
+    <label>Usuario<input type="text" id="s-usuario" autocomplete="username" required></label>
+    <label>Clave (mínimo 10 caracteres)<input type="password" id="s-clave" autocomplete="new-password" minlength="10" required></label>
+    <label>Repite la clave<input type="password" id="s-clave2" autocomplete="new-password" minlength="10" required></label>
+    <button class="btn wide" type="submit">Crear administradora</button></form>`;
+}
 function vistaEntrada(mensaje) {
   $('#admin').innerHTML = `<form class="panel stack entrada" id="f-entrar"><span class="brand">Elijo</span><h2>Administración</h2>
     ${mensaje ? `<p class="errores">${esc(mensaje)}</p>` : ''}
@@ -115,7 +125,11 @@ const abiertas = () => [...document.querySelectorAll('details.panel')].map(d => 
 function redibujar() { const ab = abiertas(); vistaPanel(); document.querySelectorAll('details.panel').forEach((d, i) => { if (ab[i] !== undefined) d.open = ab[i]; }); }
 
 async function arrancar() {
-  try { usuario = (await api('GET', '/api/admin/sesion')).usuario; } catch (e) { return vistaEntrada(); }
+  try { usuario = (await api('GET', '/api/admin/sesion')).usuario; }
+  catch (e) {
+    const est = await api('GET', '/api/admin/estado').catch(() => ({}));
+    return est.configurar ? vistaConfigurar() : vistaEntrada(est.hayAdmin === false ? 'Aún no hay administradora. Pide a quien instaló la app que defina el código de configuración.' : '');
+  }
   await cargarTodo();
   vistaPanel();
 }
@@ -123,6 +137,11 @@ async function cargarTodo() { C = await api('GET', '/api/contenido'); R = await 
 
 document.addEventListener('submit', async ev => {
   ev.preventDefault();
+  if (ev.target.id === 'f-configurar') {
+    if ($('#s-clave').value !== $('#s-clave2').value) return vistaConfigurar('Las dos claves no coinciden.');
+    try { usuario = (await api('POST', '/api/admin/configurar', {token: $('#s-token').value.trim(), usuario: $('#s-usuario').value.trim(), clave: $('#s-clave').value})).usuario; await cargarTodo(); vistaPanel(); toast('Administradora creada. Ya puedes borrar el código de configuración del servidor.'); }
+    catch (e) { vistaConfigurar(e.message); }
+  }
   if (ev.target.id === 'f-entrar') {
     try { usuario = (await api('POST', '/api/admin/entrar', {usuario: $('#e-usuario').value.trim(), clave: $('#e-clave').value})).usuario; await cargarTodo(); vistaPanel(); }
     catch (e) { vistaEntrada(e.message); }

@@ -1,0 +1,13 @@
+{
+  "name": "Elijo",
+  "short_name": "Elijo",
+  "description": "Consejería para elegir un método anticonceptivo después del parto",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F2F9",
+  "theme_color": "#A3246A",
+  "icons": [
+    { "src": "/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

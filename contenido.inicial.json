@@ -1,0 +1,391 @@
+{
+ "version": "1.1",
+ "fecha": "2026-10-03",
+ "metodos": [
+  {
+   "id": "implante",
+   "nombre": "Implante",
+   "apodo": "Varilla pequeña bajo la piel del brazo",
+   "efic": 0.1,
+   "dura": "3 a 5 años",
+   "uso": "Lo coloca personal de salud en minutos, con anestesia local. Se retira cuando tú quieras.",
+   "lact": "No afecta la leche.",
+   "efectos": "Puede cambiar tu sangrado: irregular, menos o ninguno.",
+   "msp": true,
+   "hormonal": true,
+   "tags": [
+    "nodiario",
+    "anios",
+    "discreto"
+   ],
+   "activo": true
+  },
+  {
+   "id": "diu_cu",
+   "nombre": "T de cobre",
+   "apodo": "DIU sin hormonas, dentro del útero",
+   "efic": 0.8,
+   "dura": "Hasta 12 años",
+   "uso": "Lo coloca personal de salud. Puede ponerse en las primeras 48 horas después del parto o desde las 4 semanas.",
+   "lact": "No tiene hormonas. No afecta la leche.",
+   "efectos": "Regla más larga y abundante y más cólicos, sobre todo los primeros 3 a 6 meses.",
+   "msp": true,
+   "hormonal": false,
+   "tags": [
+    "nodiario",
+    "anios",
+    "sinhormonas",
+    "discreto"
+   ],
+   "activo": true
+  },
+  {
+   "id": "diu_lng",
+   "nombre": "DIU hormonal",
+   "apodo": "T con hormona, dentro del útero",
+   "efic": 0.7,
+   "dura": "Hasta 5 años",
+   "uso": "Lo coloca personal de salud. Mismos momentos que la T de cobre.",
+   "lact": "No afecta la leche.",
+   "efectos": "Regla más ligera y de menos días, o irregular. Es normal y no hace daño.",
+   "msp": false,
+   "hormonal": true,
+   "tags": [
+    "nodiario",
+    "anios",
+    "discreto"
+   ],
+   "activo": true
+  },
+  {
+   "id": "dmpa",
+   "nombre": "Inyección de 3 meses",
+   "apodo": "Solo progestina",
+   "efic": 4,
+   "dura": "3 meses por dosis",
+   "uso": "Una inyección cada 3 meses en el centro de salud.",
+   "lact": "No afecta la leche.",
+   "efectos": "Sangrado irregular los primeros meses y luego ausencia de regla. Puede haber aumento gradual de peso. Al dejarla, el embarazo tarda unos meses más en llegar.",
+   "msp": true,
+   "hormonal": true,
+   "tags": [
+    "nodiario",
+    "discreto"
+   ],
+   "activo": true
+  },
+  {
+   "id": "pop",
+   "nombre": "Píldora de solo progestina",
+   "apodo": "Minipíldora",
+   "efic": 7,
+   "dura": "Mientras la tomes",
+   "uso": "Una pastilla cada día, a la misma hora, sin descanso.",
+   "lact": "No afecta la leche.",
+   "efectos": "Cambios en el sangrado, que no hacen daño. Dando pecho puede alargar el tiempo sin regla.",
+   "msp": false,
+   "hormonal": true,
+   "tags": [
+    "dejar"
+   ],
+   "activo": true
+  },
+  {
+   "id": "combi",
+   "nombre": "Métodos combinados",
+   "apodo": "Píldora combinada o inyección mensual",
+   "efic": 7,
+   "dura": "Mientras los uses",
+   "uso": "Pastilla diaria o inyección cada mes. Tienen estrógeno y progestina.",
+   "lact": "El estrógeno puede disminuir la leche en los primeros meses.",
+   "efectos": "Sangrado irregular los primeros meses y luego más ligero y regular. No se usan con algunas condiciones de salud.",
+   "msp": true,
+   "hormonal": true,
+   "combinado": true,
+   "tags": [
+    "dejar"
+   ],
+   "activo": true
+  },
+  {
+   "id": "condon",
+   "nombre": "Condón",
+   "apodo": "También protege de infecciones",
+   "efic": 13,
+   "dura": "Cada relación",
+   "uso": "Uno nuevo en cada relación sexual. Se puede combinar con cualquier otro método.",
+   "lact": "No afecta la leche.",
+   "efectos": "No tiene hormonas. Además protege de infecciones de transmisión sexual.",
+   "msp": true,
+   "hormonal": false,
+   "tags": [
+    "sinhormonas",
+    "dejar"
+   ],
+   "activo": true
+  },
+  {
+   "id": "mela",
+   "nombre": "Lactancia y amenorrea (MELA)",
+   "apodo": "Protección natural y temporal",
+   "efic": 2,
+   "dura": "Hasta los 6 meses",
+   "uso": "Solo protege si se cumplen 3 condiciones a la vez: tu bebé tiene menos de 6 meses, le das solo pecho y no ha vuelto tu regla.",
+   "lact": "Depende de la lactancia exclusiva.",
+   "efectos": "Deja de proteger en cuanto falla una de las 3 condiciones.",
+   "msp": true,
+   "hormonal": false,
+   "tags": [
+    "sinhormonas"
+   ],
+   "activo": false
+  },
+  {
+   "id": "ligadura",
+   "nombre": "Ligadura",
+   "apodo": "Permanente, para ti",
+   "efic": 0.5,
+   "dura": "Para siempre",
+   "uso": "Cirugía pequeña. Puede hacerse en la cesárea, en los primeros 7 días después del parto o desde las 6 semanas.",
+   "lact": "No afecta la leche.",
+   "efectos": "No es reversible. Decide sin presión y con tiempo.",
+   "msp": true,
+   "hormonal": false,
+   "permanente": true,
+   "tags": [
+    "nodiario",
+    "sinhormonas",
+    "anios"
+   ],
+   "activo": true
+  },
+  {
+   "id": "vasectomia",
+   "nombre": "Vasectomía",
+   "apodo": "Permanente, para tu pareja",
+   "efic": 0.15,
+   "dura": "Para siempre",
+   "uso": "Cirugía sencilla para el hombre. Protege después de 3 meses; mientras tanto usen condón u otro método.",
+   "lact": "No afecta la leche.",
+   "efectos": "No es reversible. No afecta el desempeño sexual.",
+   "msp": true,
+   "hormonal": false,
+   "permanente": true,
+   "tags": [
+    "nodiario",
+    "sinhormonas",
+    "anios"
+   ],
+   "activo": true
+  }
+ ],
+ "mitos": [
+  {
+   "q": "Si doy pecho, no me puedo embarazar.",
+   "v": false,
+   "r": "Dar pecho no es un método seguro por sí solo. Su protección depende de condiciones estrictas y se pierde sin aviso. Elige un método con tu obstetra.",
+   "f": "CDC, 2024",
+   "activo": true
+  },
+  {
+   "q": "El implante o la inyección de 3 meses cortan la leche.",
+   "v": false,
+   "r": "Los métodos de solo progestina se pueden usar durante la lactancia.",
+   "f": "OMS, 2025",
+   "activo": true
+  },
+  {
+   "q": "Hay que esperar la primera regla para empezar un método.",
+   "v": false,
+   "r": "No hace falta esperar. El implante, la inyección de 3 meses y la píldora de solo progestina pueden iniciarse antes de que vuelva la regla.",
+   "f": "OMS, 2025",
+   "activo": true
+  },
+  {
+   "q": "La T de cobre se puede poner el mismo día del parto.",
+   "v": true,
+   "r": "Se puede colocar en las primeras 48 horas. Si no, se espera hasta las 4 semanas.",
+   "f": "OMS, 2025",
+   "activo": true
+  },
+  {
+   "q": "Las pastillas combinadas son buena opción apenas nace el bebé.",
+   "v": false,
+   "r": "Si das solo pecho, se espera hasta los 6 meses. Si no das pecho, no se usan en las primeras 3 semanas.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Para pedir un método necesito permiso de mi pareja.",
+   "v": false,
+   "r": "En el MSP la asesoría y los métodos son gratuitos y la decisión es tuya.",
+   "f": "MSP, Acuerdo 2490",
+   "activo": true
+  }
+ ],
+ "temores": [
+  {
+   "q": "Me da miedo quedar estéril",
+   "r": "El implante, la T y las inyecciones no causan infertilidad. Cuando dejas el método, puedes volver a embarazarte.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Dicen que la T se mueve por el cuerpo o da cáncer",
+   "r": "La T se queda en el útero. No viaja al corazón ni al cerebro, y no causa cáncer.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Mi pareja no quiere que me cuide",
+   "r": "Es una de las razones más comunes. La decisión es tuya y en el MSP no necesitas permiso de nadie. Hay métodos que nadie nota. Si quieres, invítalo a la consulta.",
+   "f": "MSP, Acuerdo 2490; Cunalata y Tito, 2025",
+   "activo": true
+  },
+  {
+   "q": "Aún no me baja la regla o no tengo relaciones",
+   "r": "Puedes elegir tu método ahora y tenerlo listo. Varios se pueden iniciar antes de que vuelva la regla.",
+   "f": "OMS, 2025",
+   "activo": true
+  },
+  {
+   "q": "En mi familia nos cuidamos con plantas o con el calendario",
+   "r": "Tus costumbres merecen respeto. Con el calendario, entre 12 y 23 de cada 100 mujeres se embarazan en un año. Puedes conversar con tu obstetra cómo unir tus costumbres con un método más seguro.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Por mi religión prefiero no usar nada",
+   "r": "Tu fe se respeta aquí. La OMS aconseja esperar a que tu hijo menor cumpla 2 años antes de buscar otro embarazo. Tú decides cómo lograrlo de acuerdo con tus creencias.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Ya tuve varios hijos y nunca me cuidé",
+   "r": "Tu experiencia cuenta. Si ahora quieres descansar o ya no deseas más hijos, hay métodos que duran años y métodos permanentes.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Me dan miedo los efectos en mi cuerpo",
+   "r": "Algunos métodos cambian el sangrado. Es normal y no hace daño. Si un método no te sienta bien, puedes cambiarlo cuando quieras.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Dicen que la ligadura deja débil",
+   "r": "La ligadura no debilita ni causa dolor duradero. Sí es permanente, por eso se decide con calma.",
+   "f": "OMS, Manual 2022",
+   "activo": true
+  },
+  {
+   "q": "Me da vergüenza preguntar en el centro de salud",
+   "r": "Tienes derecho a una atención confidencial y sin juicios. Puedes mostrar tu resumen de esta app para no tener que explicarlo todo.",
+   "f": "MSP, Política 2026-2030",
+   "activo": true
+  }
+ ],
+ "videos": [],
+ "alarmas": [
+  "Sangrado abundante o flujo con mal olor",
+  "Fiebre o escalofríos",
+  "Dolor de cabeza fuerte o problemas de visión que no pasan",
+  "Convulsiones, desmayo o mareo fuerte",
+  "Dolor en el pecho, falta de aire o corazón muy rápido",
+  "Palidez intensa",
+  "No poder orinar",
+  "Ideas de hacerte daño, o de dañar o rechazar a tu bebé"
+ ],
+ "refs": [
+  [
+   "Organización Mundial de la Salud. Medical eligibility criteria for contraceptive use, 6.ª ed. y anexo web. Ginebra: OMS; 2025.",
+   "https://www.who.int/publications/i/item/B09597"
+  ],
+  [
+   "Organización Mundial de la Salud y Johns Hopkins. Family Planning: A Global Handbook for Providers, 4.ª ed. 2022.",
+   "https://fphandbook.org/"
+  ],
+  [
+   "Organización Mundial de la Salud. WHO recommendations on maternal and newborn care for a positive postnatal experience. Ginebra: OMS; 2022.",
+   "https://www.who.int/publications/i/item/9789240045989"
+  ],
+  [
+   "Nguyen AT, Curtis KM, Tepper NK, et al. U.S. Medical Eligibility Criteria for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-4):1-126.",
+   "https://www.cdc.gov/mmwr/volumes/73/rr/rr7304a1.htm"
+  ],
+  [
+   "Curtis KM, Nguyen AT, Tepper NK, et al. U.S. Selected Practice Recommendations for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-3):1-77.",
+   "https://www.cdc.gov/mmwr/volumes/73/rr/rr7303a1.htm"
+  ],
+  [
+   "Sze YY, Berendes S, Russel S, et al. Digital health interventions on postpartum contraception use: systematic review. BMJ Sex Reprod Health. 2023;49(1):50-59.",
+   "https://pubmed.ncbi.nlm.nih.gov/36307185/"
+  ],
+  [
+   "Goueth RC, Maki KG, Babatunde A, et al. Technology-based contraceptive decision aids: systematic review and meta-analysis. Am J Obstet Gynecol. 2022;227(5):705-713.",
+   "https://pmc.ncbi.nlm.nih.gov/articles/PMC9800645"
+  ],
+  [
+   "Cunalata Fajardo NJ, Tito Cañamar EM. Uso de métodos anticonceptivos en zonas rurales: una revisión mediante la literatura científica. Ciencia y Educación. 2025;6(6.1):761-776.",
+   "https://zenodo.org/records/17089075"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Política Nacional de Salud Sexual y Salud Reproductiva 2026-2030. Acuerdo Ministerial 00007-2026.",
+   "https://www.registroficial.gob.ec/tercer-suplemento-no-307/"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Atención integral a niñas y adolescentes embarazadas menores de 15 años. Manual. Acuerdo Ministerial 00066-2022.",
+   "https://www.salud.gob.ec/wp-content/uploads/2023/01/AC-00066-2022-Manual_compressed_compressed.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Instructivo del Reglamento para regular el acceso a métodos anticonceptivos, Acuerdo Ministerial 2490. 2014. Norma operativa anterior a 2022.",
+   "https://www.salud.gob.ec/wp-content/uploads/2023/01/Instructivo_de_implementacion_del_acuerdo_ministerial_2490_aprobado.pdf"
+  ],
+  [
+   "Dey T, Bassiony N, Hancock A, et al. Critical signs and symptoms for self-assessment in the immediate postnatal period: systematic scoping review and Delphi consensus. BMC Pregnancy Childbirth. 2025;25(1):364.",
+   "https://doi.org/10.1186/s12884-025-07472-9"
+  ],
+  [
+   "Instituto Nacional de Estadística y Censos. Registros Estadísticos de Nacidos Vivos y Defunciones Fetales 2024. Quito: INEC; 2025.",
+   "https://www.ecuadorencifras.gob.ec/documentos/web-inec/Poblacion_y_Demografia/Nacimientos_Defunciones/2024/ENV_EDF_2024.pdf"
+  ],
+  [
+   "Khurram J, Lal A, Rahim A, Tikmani SS. Prevalence of postpartum family planning uptake and its association with spousal discussion, joint decision-making and partner approval. BMJ Open. 2025;15.",
+   "https://doi.org/10.1136/bmjopen-2024-094628"
+  ],
+  [
+   "Wang Y, Zeng C, Chen Y, et al. Short interpregnancy interval can lead to adverse pregnancy outcomes: a meta-analysis. Front Med. 2022;9:922053.",
+   "https://doi.org/10.3389/fmed.2022.922053"
+  ]
+ ],
+ "datos": [
+  {
+   "t": "Esperar al menos 2 años antes de buscar otro embarazo cuida a este bebé y al siguiente.",
+   "f": "OMS, Manual 2022"
+  },
+  {
+   "t": "Un embarazo antes de los 6 meses tiene más riesgo de parto prematuro y de bajo peso al nacer.",
+   "f": "Wang et al., 2022"
+  },
+  {
+   "t": "Puedes salir del centro de salud con tu método: varios se inician antes del alta.",
+   "f": "OMS, 2025"
+  },
+  {
+   "t": "Las mujeres que conversan con su pareja sobre el tema usan más un método.",
+   "f": "Khurram et al., 2025"
+  },
+  {
+   "t": "En el MSP la asesoría y los métodos son gratuitos.",
+   "f": "MSP, Acuerdo 2490"
+  }
+ ],
+ "historias": [],
+ "pareja": [
+  "Acompáñala a la consulta y escucha sus dudas.",
+  "La decisión sobre su cuerpo es de ella. Tu apoyo la hace más fácil.",
+  "Esperar al menos 2 años entre embarazos cuida a la madre y al bebé.",
+  "El condón es un método que depende de ti y además protege de infecciones.",
+  "Si ya no quieren más hijos, la vasectomía es una cirugía sencilla, no afecta el desempeño sexual y protege después de 3 meses."
+ ]
+}

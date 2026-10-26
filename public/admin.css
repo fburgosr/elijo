@@ -1,0 +1,19 @@
+/* Panel de administración: una columna ancha de formularios, barra de guardar siempre visible. */
+#admin{max-width:860px;margin:0 auto;padding-inline:18px;padding-block:18px 120px;display:flex;flex-direction:column;gap:18px}
+.admin label{display:flex;flex-direction:column;gap:4px;font-size:.86rem;color:var(--muted)}
+.admin textarea{min-height:68px;resize:vertical}
+.admin input[type=number]{font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.admin input[type=password]{font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.item{border-top:1.5px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
+.item:first-of-type{border-top:0;padding-top:0}
+.marca{flex-direction:row !important;align-items:center;gap:8px !important;color:var(--ink) !important;font-size:.95rem !important}
+.marca input{width:22px;height:22px;accent-color:var(--accent)}
+details.panel > summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.15rem;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.panel > summary::after{content:"+";color:var(--accent)}
+details.panel[open] > summary::after{content:"−"}
+details.panel[open] > summary{margin-bottom:14px}
+.barra{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1.5px solid var(--line);padding:10px 18px}
+.barra > div{max-width:860px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.errores{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 14px}
+.entrada{max-width:380px;margin:8vh auto 0;width:100%}

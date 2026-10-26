@@ -224,6 +224,21 @@ function sumar(string ...$ruta): void {
     ftruncate($fh, 0); rewind($fh); fwrite($fh, json_encode($r, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)); flock($fh, LOCK_UN); fclose($fh);
 }
 
+// ----- Centros de salud: cada uno con nombre y código; los conteos se separan por centro -----
+function centros(): array {
+    $a = leerJson(dirDatos() . '/ajustes.json', []);
+    $c = $a['centros'] ?? [];
+    // Compatibilidad con la versión de un solo código.
+    if (!$c && !empty($a['codigo'])) $c = [['id' => 'c1', 'nombre' => 'Centro principal', 'codigo' => (string)$a['codigo']]];
+    return array_values(is_array($c) ? $c : []);
+}
+
+function centroPorCodigo(string $codigo): ?array {
+    if ($codigo === '') return null;
+    foreach (centros() as $c) if (hash_equals((string)$c['codigo'], $codigo)) return $c;
+    return null;
+}
+
 function tokenSetup(): string {
     $env = trim((string)getenv('ELIJO_SETUP_TOKEN'));
     if ($env !== '') return $env;

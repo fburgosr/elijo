@@ -1,7 +1,7 @@
 /* Panel de administración de Elijo: edita el contenido que ven las pacientes. Las reglas clínicas no se editan aquí. */
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let C = null, R = {registro: {}, codigoDefinido: false}, usuario = null, sucio = false, errores = [];
+let C = null, R = {registro: {}, centros: []}, usuario = null, sucio = false, errores = [];
 
 async function api(metodo, ruta, cuerpo) {
   const r = await fetch(ruta, {method: metodo, headers: {'Content-Type': 'application/json', 'X-Requested-With': 'elijo'}, body: cuerpo ? JSON.stringify(cuerpo) : undefined});
@@ -22,36 +22,94 @@ const seccion = (titulo, cuerpo, abierta) => `<details class="panel"${abierta ? 
 
 /* ----- Registro anónimo de consejerías: conteos por mes ----- */
 const total = o => Object.values(o || {}).reduce((a, b) => a + b, 0);
+const nombreCentro = id => { const c = R.centros.find(x => x.id === id); return c ? c.nombre : (id === 'base' || id === 'app' ? 'Sin centro' : id); };
+// Por cada mes: los conteos de cada centro (clave = id del centro). "base"/"app" sueltos son datos de la versión de un solo código.
+function centrosDelMes(m) {
+  const out = [];
+  for (const [k, v] of Object.entries(m)) {
+    if (k === 'motivosPacientes') continue;
+    if (k === 'base' || k === 'app') { let s = out.find(x => x.id === 'sin-centro'); if (!s) { s = {id: 'sin-centro', nombre: 'Sin centro', fases: {}}; out.push(s); } s.fases[k] = v; }
+    else out.push({id: k, nombre: nombreCentro(k), fases: v || {}});
+  }
+  return out;
+}
 function filasRegistro() {
-  return Object.keys(R.registro).sort().reverse().map(mes => {
-    const m = R.registro[mes], fila = (nombre, f) => {
-      const con = total(f && f.conMetodo), sin = total(f && f.sinMetodo), n = con + sin;
-      return `<tr><td>${mes}</td><td>${nombre}</td><td class="c">${n}</td><td class="c">${con}</td><td class="c">${n ? Math.round(con / n * 100) + ' %' : ''}</td></tr>`;
-    };
-    return fila('Línea de base', m.base) + fila('Con la app', m.app);
-  }).join('');
+  return Object.keys(R.registro).sort().reverse().map(mes => centrosDelMes(R.registro[mes]).map(c => ['base', 'app'].map(fase => {
+    const f = c.fases[fase]; if (!f) return '';
+    const con = total(f.conMetodo), sin = total(f.sinMetodo), n = con + sin;
+    return `<tr><td>${mes}</td><td>${esc(c.nombre)}</td><td>${fase === 'base' ? 'Línea de base' : 'Con la app'}</td><td class="c">${n}</td><td class="c">${con}</td><td class="c">${n ? Math.round(con / n * 100) + ' %' : ''}</td></tr>`;
+  }).join('')).join('')).join('');
 }
 function csvRegistro() {
-  const lineas = ['mes,origen,resultado,detalle,cantidad'];
+  const lineas = ['mes,centro,origen,resultado,detalle,cantidad'], q = s => '"' + String(s).replace(/"/g, '""') + '"';
   for (const mes of Object.keys(R.registro).sort()) {
     const m = R.registro[mes];
-    for (const fase of ['base', 'app']) for (const res of ['conMetodo', 'sinMetodo'])
-      for (const [k, n] of Object.entries((m[fase] || {})[res] || {})) lineas.push([mes, fase, res, '"' + k.replace(/"/g, '""') + '"', n].join(','));
-    for (const [k, n] of Object.entries(m.motivosPacientes || {})) lineas.push([mes, 'paciente', 'motivoNoUso', '"' + k.replace(/"/g, '""') + '"', n].join(','));
+    for (const c of centrosDelMes(m)) for (const fase of ['base', 'app']) for (const res of ['conMetodo', 'sinMetodo'])
+      for (const [k, n] of Object.entries((c.fases[fase] || {})[res] || {})) lineas.push([mes, q(c.nombre), fase, res, q(k), n].join(','));
+    for (const [k, n] of Object.entries(m.motivosPacientes || {})) lineas.push([mes, '', 'paciente', 'motivoNoUso', q(k), n].join(','));
   }
   return lineas.join('\n');
+}
+/* ----- Estadísticas: se calculan en el navegador a partir de los conteos ----- */
+let E = {centro: '', mes: ''};
+const nombreMetodo = id => { const m = (C.metodos || []).find(x => x.id === id); return m ? m.nombre : id; };
+function datosEstadisticas() {
+  const d = {base: {n: 0, con: 0}, app: {n: 0, con: 0}, metodos: {}, motivosObst: {}, motivosPac: {}, meses: {}};
+  for (const mes of Object.keys(R.registro)) {
+    if (E.mes && mes !== E.mes) continue;
+    const m = R.registro[mes];
+    for (const c of centrosDelMes(m)) {
+      if (E.centro && c.id !== E.centro) continue;
+      for (const fase of ['base', 'app']) {
+        const f = c.fases[fase]; if (!f) continue;
+        const con = total(f.conMetodo), sin = total(f.sinMetodo);
+        d[fase].n += con + sin; d[fase].con += con;
+        const k = mes + '|' + c.nombre; d.meses[k] = d.meses[k] || {mes, centro: c.nombre, base: {n: 0, con: 0}, app: {n: 0, con: 0}};
+        d.meses[k][fase].n += con + sin; d.meses[k][fase].con += con;
+        for (const [id, n] of Object.entries(f.conMetodo || {})) d.metodos[id] = (d.metodos[id] || 0) + n;
+        for (const [k2, n] of Object.entries(f.sinMetodo || {})) d.motivosObst[k2] = (d.motivosObst[k2] || 0) + n;
+      }
+    }
+    if (!E.centro) for (const [k, n] of Object.entries(m.motivosPacientes || {})) d.motivosPac[k] = (d.motivosPac[k] || 0) + n;
+  }
+  return d;
+}
+const pct = (a, b) => b ? Math.round(a / b * 100) + ' %' : '—';
+function barras(obj, nombre) {
+  const filas = Object.entries(obj).sort((a, b) => b[1] - a[1]); const max = filas.length ? filas[0][1] : 1; const tot = filas.reduce((s, x) => s + x[1], 0);
+  return filas.length ? `<div class="est">${filas.map(([k, n]) => `<div class="fila"><span class="small">${esc(nombre(k))}</span><div class="pista"><div class="b" style="width:${Math.round(n / max * 100)}%"></div></div><span class="small"><b>${n}</b> (${pct(n, tot)})</span></div>`).join('')}</div>` : '<p class="muted small">Sin datos para este filtro.</p>';
+}
+function vistaEstadisticas() {
+  const d = datosEstadisticas(), meses = Object.keys(R.registro).sort().reverse();
+  const n = d.base.n + d.app.n, con = d.base.con + d.app.con;
+  const filas = Object.values(d.meses).sort((a, b) => b.mes.localeCompare(a.mes) || a.centro.localeCompare(b.centro));
+  const dif = d.base.n && d.app.n ? Math.round(d.app.con / d.app.n * 100) - Math.round(d.base.con / d.base.n * 100) : null;
+  return `<p class="small muted">Producción y resultado de la consejería según lo que registran las obstetras. Solo cuenta lo registrado; una consejería sin registro no aparece.</p>
+    <div class="rejilla"><label>Centro<select data-est="centro"><option value="">Todos los centros</option>${R.centros.map(c => `<option value="${esc(c.id)}"${E.centro === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select></label>
+    <label>Mes<select data-est="mes"><option value="">Todos los meses</option>${meses.map(m => `<option value="${m}"${E.mes === m ? ' selected' : ''}>${m}</option>`).join('')}</select></label></div>
+    <div class="tiles"><div class="tile"><b>${n}</b>consejerías registradas</div><div class="tile"><b>${con}</b>salieron con método (${pct(con, n)})</div><div class="tile"><b>${pct(d.base.con, d.base.n)}</b>aceptación en línea de base (${d.base.n})</div><div class="tile"><b>${pct(d.app.con, d.app.n)}</b>aceptación con la app (${d.app.n})${dif === null ? '' : `<span class="small muted">${dif >= 0 ? '+' : ''}${dif} puntos frente a la línea de base</span>`}</div></div>
+    <h3>Por mes y centro</h3>
+    ${filas.length ? `<div class="tablewrap"><table><thead><tr><th>Mes</th><th>Centro</th><th>Línea de base</th><th>Aceptación</th><th>Con la app</th><th>Aceptación</th></tr></thead><tbody>${filas.map(f => `<tr><td>${f.mes}</td><td>${esc(f.centro)}</td><td class="c">${f.base.con} / ${f.base.n}</td><td class="c">${pct(f.base.con, f.base.n)}</td><td class="c">${f.app.con} / ${f.app.n}</td><td class="c">${pct(f.app.con, f.app.n)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted small">Aún no hay registros.</p>'}
+    <h3>Métodos elegidos</h3>${barras(d.metodos, nombreMetodo)}
+    <h3>Motivos de quienes no aceptaron un método (registrados por la obstetra)</h3>${barras(d.motivosObst, x => x)}
+    <h3>Motivos que dieron las pacientes en la app</h3>${E.centro ? '<p class="muted small">Las respuestas de las pacientes no llevan centro; quita el filtro de centro para verlas.</p>' : barras(d.motivosPac, x => x)}
+    <div class="row"><button class="btn quiet" data-act="actualizarregistro">Actualizar conteos</button><button class="btn quiet" data-act="copiarcsv">Copiar datos (CSV)</button></div>`;
+}
+function recogerCentros() {
+  R.centros = [...document.querySelectorAll('[data-centro]')].map(f => ({id: f.dataset.centro, nombre: f.querySelector('.c-nombre').value.trim(), codigo: f.querySelector('.c-codigo').value.trim()}));
 }
 function vistaRegistro() {
   const motivos = {};
   for (const m of Object.values(R.registro)) for (const [k, n] of Object.entries(m.motivosPacientes || {})) motivos[k] = (motivos[k] || 0) + n;
   const top = Object.entries(motivos).sort((a, b) => b[1] - a[1]);
   return `<p class="small muted">Solo se guardan conteos por mes. No hay nombres, cédulas ni respuestas individuales.</p>
-    ${R.codigoDefinido ? `<p><b>Código vigente:</b> <code id="g-codigo-actual">${esc(R.codigo)}</code> <button class="link" data-act="copiarcodigo">Copiar</button></p>` : '<p class="errores">Aún no hay código. Sin él, las obstetras no pueden registrar consejerías.</p>'}
-    <div class="rejilla"><label>${R.codigoDefinido ? 'Cambiar el código (de 4 a 20 caracteres)' : 'Código del establecimiento (de 4 a 20 caracteres)'}<input type="text" id="g-codigo" maxlength="20" autocomplete="off"></label></div>
-    <div class="row"><button class="btn quiet" data-act="codigo">Guardar código</button><button class="btn quiet" data-act="actualizarregistro">Actualizar conteos</button></div>
-    <p class="small muted">Las obstetras escriben este código una vez en Modo obstetra, Registro. Los conteos se cargan al abrir el panel; usa "Actualizar conteos" para ver los registros más recientes.</p>
+    <h3>Centros de salud y sus códigos</h3>
+    <p class="small muted">Cada centro tiene su propio código; las obstetras de ese centro lo escriben una vez en Modo obstetra → Registro, y sus consejerías se cuentan aparte. El código: de 4 a 20 caracteres, sin espacios.</p>
+    ${R.centros.length ? R.centros.map((c, i) => `<div class="item" data-centro="${esc(c.id || '')}"><div class="rejilla"><label>Centro de salud<input type="text" class="c-nombre" maxlength="60" value="${esc(c.nombre)}"></label><label>Código<input type="text" class="c-codigo" maxlength="20" autocomplete="off" value="${esc(c.codigo)}"></label></div><div class="row"><button class="link" data-quitarcentro="${i}">Quitar</button></div></div>`).join('') : '<p class="errores">Aún no hay centros. Sin un código, las obstetras no pueden registrar consejerías.</p>'}
+    <div class="row"><button class="btn quiet" data-act="agregarcentro">Añadir centro</button><button class="btn" data-act="guardarcentros">Guardar centros</button><button class="btn quiet" data-act="actualizarregistro">Actualizar conteos</button></div>
     <h3>Pacientes que salen con un método</h3>
-    ${filasRegistro() ? `<div class="tablewrap"><table><thead><tr><th>Mes</th><th>Origen</th><th>Consejerías</th><th>Con método</th><th>Aceptación</th></tr></thead><tbody>${filasRegistro()}</tbody></table></div>` : '<p class="muted small">Aún no hay registros.</p>'}
+    <p class="small muted">Los conteos se cargan al abrir el panel; usa "Actualizar conteos" para ver los registros más recientes.</p>
+    ${filasRegistro() ? `<div class="tablewrap"><table><thead><tr><th>Mes</th><th>Centro</th><th>Origen</th><th>Consejerías</th><th>Con método</th><th>Aceptación</th></tr></thead><tbody>${filasRegistro()}</tbody></table></div>` : '<p class="muted small">Aún no hay registros.</p>'}
     <h3>Por qué algunas pacientes no quieren un método</h3>
     ${top.length ? `<ul class="plain">${top.map(([k, n]) => `<li>${esc(k)}: <b>${n}</b></li>`).join('')}</ul>` : '<p class="muted small">Aún no hay respuestas.</p>'}
     <label>Datos para copiar a una hoja de cálculo (CSV)<textarea rows="5" readonly>${esc(csvRegistro())}</textarea></label>`;
@@ -107,6 +165,7 @@ function vistaPanel() {
     ${seccion('Señales de alarma', `<label>Una señal por línea<textarea id="a-alarmas" rows="9">${esc(C.alarmas.join('\n'))}</textarea></label>`)}
     ${seccion(`Referencias bibliográficas (${C.refs.length})`, `<label>Una referencia por línea, con el formato: cita completa | https://enlace<textarea id="a-refs" rows="14">${esc(C.refs.map(r => r[0] + ' | ' + r[1]).join('\n'))}</textarea></label>`)}
     ${seccion('Registro de consejerías', vistaRegistro())}
+    ${seccion('Estadísticas', vistaEstadisticas())}
     ${seccion('Cambiar mi clave', `<form class="stack" id="f-clave"><div class="rejilla"><label>Clave actual<input type="password" id="c-actual" autocomplete="current-password" required></label><label>Clave nueva (mínimo 10 caracteres)<input type="password" id="c-nueva" autocomplete="new-password" minlength="10" required></label></div><div><button class="btn quiet" type="submit">Cambiar clave</button></div></form>`)}
     ${seccion('Volver al contenido inicial', '<p class="small muted">Descarta todo lo publicado y vuelve al contenido con el que se instaló la app. La versión actual queda guardada en el historial del servidor.</p><div><button class="btn quiet" data-act="restaurar">Restaurar contenido inicial</button></div><div id="confirma"></div>')}
     <div class="barra"><div><span class="small muted" id="estado">${sucio ? 'Hay cambios sin publicar.' : 'Todo está publicado.'}</span><span class="row"><a class="link" href="/" target="_blank" rel="noopener">Ver la app</a><button class="btn" data-act="guardar">Guardar y publicar</button></span></div></div>`;
@@ -152,7 +211,7 @@ document.addEventListener('submit', async ev => {
     catch (e) { toast(e.message); }
   }
 });
-document.addEventListener('input', ev => { if (ev.target.closest('#f-clave, #f-entrar') || ev.target.id === 'g-codigo') return; sucio = true; const e = $('#estado'); if (e) e.textContent = 'Hay cambios sin publicar.'; });
+document.addEventListener('input', ev => { if (ev.target.closest('#f-clave, #f-entrar, [data-centro]')) return; sucio = true; const e = $('#estado'); if (e) e.textContent = 'Hay cambios sin publicar.'; });
 document.addEventListener('click', async ev => {
   const b = ev.target.closest('button'); if (!b || b.form) return; // los botones de los formularios (entrar, configurar, clave) los atiende el evento submit
   const d = b.dataset;
@@ -169,10 +228,18 @@ document.addEventListener('click', async ev => {
   }
   if (d.act === 'restaurar') { $('#confirma').innerHTML = '<p class="errores">Esto reemplaza todo el contenido publicado. <button class="link" data-act="restaurar-si">Sí, restaurar</button></p>'; }
   if (d.act === 'restaurar-si') { try { C = await api('POST', '/api/admin/restaurar'); errores = []; sucio = false; redibujar(); toast('Contenido inicial restaurado'); } catch (e) { toast(e.message); } }
-  if (d.act === 'copiarcodigo') { const t = $('#g-codigo-actual').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Código copiado'), () => toast('No se pudo copiar')); return; }
-  if (d.act === 'actualizarregistro') { try { R = await api('GET', '/api/admin/registro'); recoger(); redibujar(); toast('Conteos actualizados'); } catch (e) { toast(e.message); } return; }
-  if (d.act === 'codigo') { try { const c = $('#g-codigo').value.trim(); await api('PUT', '/api/admin/codigo', {codigo: c}); R.codigoDefinido = true; R.codigo = c; recoger(); redibujar(); toast('Código guardado: ' + c); } catch (e) { toast(e.message); } }
+  if (d.act === 'actualizarregistro') { try { recoger(); recogerCentros(); const centrosEditados = R.centros; R = await api('GET', '/api/admin/registro'); R.centros = centrosEditados.length ? centrosEditados : R.centros; redibujar(); toast('Conteos actualizados'); } catch (e) { toast(e.message); } return; }
+  if (d.act === 'copiarcsv') { const t = csvRegistro(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Datos copiados'), () => toast('No se pudo copiar; usa el recuadro CSV de Registro')); return; }
+  if (d.act === 'agregarcentro') { recoger(); recogerCentros(); R.centros.push({id: '', nombre: '', codigo: ''}); return redibujar(); }
+  if (d.quitarcentro !== undefined) { recoger(); recogerCentros(); R.centros.splice(+d.quitarcentro, 1); return redibujar(); }
+  if (d.act === 'guardarcentros') {
+    recoger(); recogerCentros();
+    try { R.centros = (await api('PUT', '/api/admin/centros', {centros: R.centros})).centros; redibujar(); toast('Centros guardados: ' + R.centros.length); }
+    catch (e) { toast(e.message); }
+    return;
+  }
   if (d.act === 'salir') { await api('POST', '/api/admin/salir').catch(() => {}); usuario = null; vistaEntrada(); }
 });
+document.addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.est; if (k) { E[k] = ev.target.value; recoger(); recogerCentros(); redibujar(); } });
 window.addEventListener('beforeunload', ev => { if (sucio) ev.preventDefault(); });
 arrancar();

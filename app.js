@@ -111,7 +111,7 @@ const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') 
 const EJEMPLO = {general:false, embarazada:false, nacimiento: iso(new Date(hoy.getTime() - 21*DIA)), parto:'normal', alimento:'pecho', regla:'no', deseo:'anios', importa:['nodiario'], condiciones:[], ejemplo:true};
 let S = {rueda:{momento:'I', sel:new Set(), abierto:0}, dato:0, codigo:'', registradas:0, reg:{fase:'app', metodo:null}, vista:'inicio', paso:0, a:{...EJEMPLO}, metodo:null, comparar:[], favoritos:[], dudas:[], mito:0, mitoVisto:false, obst:'rueda', lista:[]};
 try { const g = JSON.parse(localStorage.getItem('elijo') || 'null'); if (g && g.a) { S.a = g.a; S.favoritos = g.favoritos || []; } } catch(e){}
-try { S.codigo = localStorage.getItem('elijo-codigo') || ''; } catch(e){}
+try { S.codigo = localStorage.getItem('elijo-codigo') || ''; S.centro = localStorage.getItem('elijo-centro') || ''; } catch(e){}
 const guardar = () => { try { localStorage.setItem('elijo', JSON.stringify({a:S.a, favoritos:S.favoritos})); } catch(e){} };
 
 /* ===== Contenido publicado por la administración ===== */
@@ -365,7 +365,7 @@ function vRegistro(){
     '<p><b>¿Con qué método salió la paciente?</b></p><div class="stack">' + ops.map(([k, t]) => '<button class="opt" data-regmet="' + k + '" aria-pressed="' + (r.metodo === k) + '"><span class="tick">' + (r.metodo === k ? '✓' : '') + '</span>' + t + '</button>').join('') + '</div>' +
     (r.metodo === 'ninguno' ? '<label class="stack" for="r-mot"><span class="small muted">Motivo principal</span><select id="r-mot">' + TEMORES.map(t => t.q).concat(OTROS_MOTIVOS).map(t => '<option>' + t + '</option>').join('') + '</select></label>' : '') +
     '<button class="btn wide" data-act="registrar">Registrar</button>' +
-    '<p class="small muted">Código de este teléfono: <b>' + esc(S.codigo) + '</b> · <button class="link" data-act="olvidarcodigo" style="padding:0">Cambiar</button></p>' +
+    '<p class="small muted">' + (S.centro ? 'Centro: <b>' + esc(S.centro) + '</b> · ' : '') + 'Código de este teléfono: <b>' + esc(S.codigo) + '</b> · <button class="link" data-act="olvidarcodigo" style="padding:0">Cambiar</button></p>' +
     '<p class="small muted">Enviadas en esta sesión: ' + S.registradas + (pend ? '. <b>Pendientes de envío: ' + pend + '</b> <button class="link" data-act="reintentar" style="padding:0">Reintentar ahora</button>' : '') + '</p></div>';
 }
 async function registrarConsejeria(){
@@ -376,7 +376,8 @@ async function registrarConsejeria(){
     const res = await enviar('/api/registro/consejeria', cuerpo);
     if (res.status === 403) return toast('El código del establecimiento no es correcto');
     if (!res.ok) return toast('No se pudo registrar. Intenta de nuevo.');
-    S.registradas++; r.metodo = null; toast('Registrada y enviada al servidor'); render();
+    const j = await res.json().catch(() => ({})); if (j.centro){ S.centro = j.centro; try { localStorage.setItem('elijo-centro', j.centro); } catch(e){} }
+    S.registradas++; r.metodo = null; toast('Registrada en ' + (j.centro || 'el servidor')); render();
   } catch(e){ encolar('/api/registro/consejeria', cuerpo); S.registradas++; r.metodo = null; toast('Sin señal: guardada, se enviará sola al volver la conexión'); render(); }
 }
 /* ----- Rueda de elegibilidad: tabla resumen de la OMS 2025 (rueda.js) ----- */
@@ -461,8 +462,17 @@ document.addEventListener('click', ev => {
     case 'calendario': return calendario();
     case 'otrodato': S.dato++; return render();
     case 'copiarpareja': (navigator.clipboard ? navigator.clipboard.writeText(textoPareja()) : Promise.reject()).then(() => toast('Mensaje copiado'), () => toast('No se pudo copiar')); return;
-    case 'guardarcodigo': { const v = $('#r-cod').value.trim(); if (v.length < 4) return toast('Escribe el código del establecimiento'); try { localStorage.setItem('elijo-codigo', v); } catch(e){} S.codigo = v; return render(); }
-    case 'olvidarcodigo': try { localStorage.removeItem('elijo-codigo'); } catch(e){} S.codigo = ''; return render();
+    case 'guardarcodigo': {
+      const v = $('#r-cod').value.trim(); if (v.length < 4) return toast('Escribe el código del establecimiento');
+      enviar('/api/registro/centro', {codigo:v}).then(async res => {
+        if (res.status === 403) return toast('Código no reconocido. Pide el código correcto a la administración.');
+        const j = res.ok ? await res.json().catch(() => ({})) : {};
+        S.codigo = v; S.centro = j.centro || ''; try { localStorage.setItem('elijo-codigo', v); localStorage.setItem('elijo-centro', S.centro); } catch(e){}
+        toast(j.centro ? 'Código correcto: ' + j.centro : 'Código guardado'); render();
+      }).catch(() => { S.codigo = v; S.centro = ''; try { localStorage.setItem('elijo-codigo', v); } catch(e){} toast('Sin señal: guardado, se comprobará al registrar'); render(); });
+      return;
+    }
+    case 'olvidarcodigo': try { localStorage.removeItem('elijo-codigo'); localStorage.removeItem('elijo-centro'); } catch(e){} S.codigo = ''; S.centro = ''; return render();
     case 'general': S.paso = 0; S.plan = false; a.general = true; a.embarazada = false; return ir('preguntas');
     case 'embarazada': a.embarazada = !a.embarazada; return render();
     case 'atras': tomarFecha(); if (S.paso === 0) return ir('inicio'); S.paso--; return render();

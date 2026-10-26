@@ -89,34 +89,51 @@ try {
     if ($es('POST', '/api/registro/consejeria')) {
         limitar('consejeria', 120, 60);
         $b = cuerpo();
-        $esperado = (string)(leerJson(dirDatos() . '/ajustes.json', [])['codigo'] ?? '');
-        if ($esperado === '' || !hash_equals($esperado, (string)($b['codigo'] ?? ''))) responder(['error' => 'El código del establecimiento no es correcto.'], 403);
+        $centro = centroPorCodigo((string)($b['codigo'] ?? ''));
+        if (!$centro) responder(['error' => 'El código del establecimiento no es correcto.'], 403);
         $fase = (string)($b['fase'] ?? '');
         if (!in_array($fase, ['base', 'app'], true)) responder(['error' => 'Indica si es línea de base o uso con la app.'], 400);
         $metodo = (string)($b['metodo'] ?? '');
         if ($metodo === 'ninguno') {
             $motivo = (string)($b['motivo'] ?? '');
             if (!in_array($motivo, motivosValidos(), true)) responder(['error' => 'Elige el motivo.'], 400);
-            sumar($fase, 'sinMetodo', $motivo);
+            sumar($centro['id'], $fase, 'sinMetodo', $motivo);
         } elseif (in_array($metodo, array_column(semilla()['metodos'], 'id'), true)) {
-            sumar($fase, 'conMetodo', $metodo);
+            sumar($centro['id'], $fase, 'conMetodo', $metodo);
         } else responder(['error' => 'Método no válido.'], 400);
-        responder([]);
+        responder(['centro' => $centro['nombre']]);
+    }
+
+    // El teléfono comprueba el código al guardarlo y muestra el nombre del centro.
+    if ($es('POST', '/api/registro/centro')) {
+        limitar('centro', 30, 60);
+        $centro = centroPorCodigo((string)(cuerpo()['codigo'] ?? ''));
+        if (!$centro) responder(['error' => 'El código del establecimiento no es correcto.'], 403);
+        responder(['centro' => $centro['nombre']]);
     }
 
     if ($es('GET', '/api/admin/registro')) {
         soloAdmin();
-        $codigo = (string)(leerJson(dirDatos() . '/ajustes.json', [])['codigo'] ?? '');
-        responder(['registro' => (object)leerJson(dirDatos() . '/registro.json', []), 'codigoDefinido' => $codigo !== '', 'codigo' => $codigo]);
+        responder(['registro' => (object)leerJson(dirDatos() . '/registro.json', []), 'centros' => centros()]);
     }
 
-    if ($es('PUT', '/api/admin/codigo')) {
+    if ($es('PUT', '/api/admin/centros')) {
         soloAdmin();
-        $c = (string)(cuerpo()['codigo'] ?? '');
-        if (strlen($c) < 4 || strlen($c) > 20) responder(['error' => 'El código debe tener de 4 a 20 caracteres.'], 400);
-        $a = leerJson(dirDatos() . '/ajustes.json', []); $a['codigo'] = $c;
+        $lista = cuerpo()['centros'] ?? null;
+        if (!is_array($lista) || count($lista) > 30) responder(['error' => 'Revisa la lista de centros.'], 400);
+        $nuevos = []; $codigos = [];
+        foreach (array_values($lista) as $i => $c) {
+            $nombre = trim((string)($c['nombre'] ?? '')); $codigo = trim((string)($c['codigo'] ?? '')); $id = (string)($c['id'] ?? '');
+            if (mb_strlen($nombre) < 2 || mb_strlen($nombre) > 60) responder(['error' => 'Centro ' . ($i + 1) . ': el nombre debe tener de 2 a 60 caracteres.'], 400);
+            if (strlen($codigo) < 4 || strlen($codigo) > 20 || preg_match('/\s/', $codigo)) responder(['error' => "Centro \"$nombre\": el código debe tener de 4 a 20 caracteres, sin espacios."], 400);
+            if (in_array($codigo, $codigos, true)) responder(['error' => "El código \"$codigo\" está repetido; cada centro necesita uno distinto."], 400);
+            $codigos[] = $codigo;
+            if (!preg_match('/^c[0-9a-f]{1,8}$/', $id)) $id = 'c' . bin2hex(random_bytes(3));
+            $nuevos[] = ['id' => $id, 'nombre' => $nombre, 'codigo' => $codigo];
+        }
+        $a = leerJson(dirDatos() . '/ajustes.json', []); unset($a['codigo']); $a['centros'] = $nuevos;
         escribirJson(dirDatos() . '/ajustes.json', $a);
-        responder([]);
+        responder(['centros' => $nuevos]);
     }
 
     responder(['error' => 'Ruta no encontrada.'], 404);

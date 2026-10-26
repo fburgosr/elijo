@@ -21,7 +21,7 @@ php -S localhost:3000 router.php
 - Videos guía por método o generales (solo enlaces `https://`).
 - Señales de alarma y referencias bibliográficas.
 - Clave de la administradora.
-- Código del establecimiento para el registro de consejerías, y los conteos por mes: pacientes que salen con método (línea de base y con la app) y motivos de quienes no quieren un método.
+- Centros de salud, cada uno con su código para el registro de consejerías, y los conteos por mes y por centro: pacientes que salen con método (línea de base y con la app) y motivos de quienes no quieren un método.
 
 El método de lactancia y amenorrea viene desactivado. Se activa en Métodos.
 
@@ -45,7 +45,7 @@ Fuera del directorio público, en la carpeta hermana `elijo-datos` (o en la que 
 - `historial/`: una copia de cada versión anterior.
 - `admin.json`: usuario y clave cifrada de la administradora.
 - `secreto.txt`: firma de las sesiones.
-- `registro.json`: conteos anónimos por mes. `ajustes.json`: código del establecimiento. `limites.json`: intentos por IP.
+- `registro.json`: conteos anónimos por mes. `ajustes.json`: centros de salud y sus códigos. `limites.json`: intentos por IP.
 
 La app no guarda datos de las pacientes en el servidor: solo conteos. Sus respuestas quedan en su teléfono.
 

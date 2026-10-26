@@ -1,7 +1,7 @@
 // Comprueba la tabla de la rueda de elegibilidad: formato de cada celda y casos conocidos de la guía OMS 2025.
 // Uso: node herramientas/probar-rueda.js
 global.window = {};
-require('../public/rueda.js');
+require('../rueda.js');
 const { MEC, mecEvaluar } = window;
 let fallos = 0;
 const ok = (nombre, cond) => { console.log((cond ? 'ok   ' : 'FALLA ') + nombre); if (!cond) fallos++; };

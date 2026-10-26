@@ -12,13 +12,18 @@ function dirDatos(): string {
     static $dir = null;
     if ($dir !== null) return $dir;
     $env = getenv('DATA_DIR');
-    $candidatos = $env ? [$env] : [dirname(__DIR__) . '/elijo-datos', __DIR__ . '/data'];
+    // Si el sitio cuelga de un public_html (hosting compartido), los datos van junto a public_html, nunca dentro.
+    $fuera = null;
+    for ($d = __DIR__; dirname($d) !== $d; $d = dirname($d)) {
+        if (basename($d) === 'public_html') { $fuera = dirname($d) . '/elijo-datos'; break; }
+    }
+    $candidatos = $env ? [$env] : array_values(array_filter([$fuera, dirname(__DIR__) . '/elijo-datos', __DIR__ . '/data']));
     foreach ($candidatos as $c) {
         if (!is_dir($c)) @mkdir($c, 0700, true);
         if (is_dir($c) && is_writable($c)) {
             if (!is_dir("$c/historial")) @mkdir("$c/historial", 0700, true);
             // Si por fuerza quedó dentro del sitio, se bloquea el acceso web.
-            if (str_starts_with($c, __DIR__) && !file_exists("$c/.htaccess")) {
+            if (!file_exists("$c/.htaccess")) {
                 file_put_contents("$c/.htaccess", "Require all denied\nDeny from all\n");
             }
             return $dir = $c;

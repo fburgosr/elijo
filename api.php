@@ -106,7 +106,8 @@ try {
 
     if ($es('GET', '/api/admin/registro')) {
         soloAdmin();
-        responder(['registro' => (object)leerJson(dirDatos() . '/registro.json', []), 'codigoDefinido' => !empty(leerJson(dirDatos() . '/ajustes.json', [])['codigo'])]);
+        $codigo = (string)(leerJson(dirDatos() . '/ajustes.json', [])['codigo'] ?? '');
+        responder(['registro' => (object)leerJson(dirDatos() . '/registro.json', []), 'codigoDefinido' => $codigo !== '', 'codigo' => $codigo]);
     }
 
     if ($es('PUT', '/api/admin/codigo')) {

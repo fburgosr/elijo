@@ -358,14 +358,15 @@ function elegirMotivo(m){
 }
 function vRegistro(){
   if (!S.codigo) return '<div class="panel stack"><h3>Registro de consejerías</h3><p class="small muted">Cuenta cuántas pacientes salen con un método. No guarda nombres ni cédulas. Pide el código a la administración de la app.</p><label class="stack" for="r-cod"><span class="small muted">Código del establecimiento</span><input type="text" id="r-cod" autocomplete="off"></label><button class="btn wide" data-act="guardarcodigo">Guardar código en este dispositivo</button></div>';
-  const r = S.reg, fases = [['base','Línea de base, sin la app'],['app','Consejería con la app']];
+  const r = S.reg, fases = [['base','Línea de base, sin la app'],['app','Consejería con la app']], pend = leerCola().length;
   const ops = activos().map(m => [m.id, m.nombre]).concat([['ninguno','Salió sin método']]);
   return '<div class="panel stack"><h3>Registro de consejerías</h3><p class="small muted">Un registro por paciente, al terminar la consejería. No guarda nombres ni cédulas.</p>' +
     '<div class="row">' + fases.map(([k, t]) => '<button class="btn seg ' + (r.fase === k ? '' : 'quiet') + '" data-regfase="' + k + '">' + t + '</button>').join('') + '</div>' +
     '<p><b>¿Con qué método salió la paciente?</b></p><div class="stack">' + ops.map(([k, t]) => '<button class="opt" data-regmet="' + k + '" aria-pressed="' + (r.metodo === k) + '"><span class="tick">' + (r.metodo === k ? '✓' : '') + '</span>' + t + '</button>').join('') + '</div>' +
     (r.metodo === 'ninguno' ? '<label class="stack" for="r-mot"><span class="small muted">Motivo principal</span><select id="r-mot">' + TEMORES.map(t => t.q).concat(OTROS_MOTIVOS).map(t => '<option>' + t + '</option>').join('') + '</select></label>' : '') +
     '<button class="btn wide" data-act="registrar">Registrar</button>' +
-    '<p class="small muted">Registradas en este dispositivo en esta sesión: ' + S.registradas + '. <button class="link" data-act="olvidarcodigo" style="padding:0">Cambiar código</button></p></div>';
+    '<p class="small muted">Código de este teléfono: <b>' + esc(S.codigo) + '</b> · <button class="link" data-act="olvidarcodigo" style="padding:0">Cambiar</button></p>' +
+    '<p class="small muted">Enviadas en esta sesión: ' + S.registradas + (pend ? '. <b>Pendientes de envío: ' + pend + '</b> <button class="link" data-act="reintentar" style="padding:0">Reintentar ahora</button>' : '') + '</p></div>';
 }
 async function registrarConsejeria(){
   const r = S.reg; if (!r.metodo) return toast('Elige con qué método salió la paciente');
@@ -375,7 +376,7 @@ async function registrarConsejeria(){
     const res = await enviar('/api/registro/consejeria', cuerpo);
     if (res.status === 403) return toast('El código del establecimiento no es correcto');
     if (!res.ok) return toast('No se pudo registrar. Intenta de nuevo.');
-    S.registradas++; r.metodo = null; toast('Registrada'); render();
+    S.registradas++; r.metodo = null; toast('Registrada y enviada al servidor'); render();
   } catch(e){ encolar('/api/registro/consejeria', cuerpo); S.registradas++; r.metodo = null; toast('Sin señal: guardada, se enviará sola al volver la conexión'); render(); }
 }
 /* ----- Rueda de elegibilidad: tabla resumen de la OMS 2025 (rueda.js) ----- */
@@ -454,6 +455,7 @@ document.addEventListener('click', ev => {
     case 'empezar': S.paso = 0; a.general = false; S.plan = false; return ir('preguntas');
     case 'plan': S.paso = 0; a.general = false; a.embarazada = true; S.plan = true; return ir('preguntas');
     case 'registrar': return registrarConsejeria();
+    case 'reintentar': vaciarCola().then(() => { toast(leerCola().length ? 'Siguen pendientes; revisa la conexión' : 'Todo enviado'); render(); }); return;
     case 'rprellenar': { const p = prellenarRueda(); if (!p.size) return toast('La paciente aún no ha respondido el cuestionario de posparto'); p.forEach(x => S.rueda.sel.add(x)); return render(); }
     case 'rlimpiar': S.rueda.sel.clear(); return render();
     case 'calendario': return calendario();

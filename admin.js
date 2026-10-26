@@ -46,9 +46,10 @@ function vistaRegistro() {
   for (const m of Object.values(R.registro)) for (const [k, n] of Object.entries(m.motivosPacientes || {})) motivos[k] = (motivos[k] || 0) + n;
   const top = Object.entries(motivos).sort((a, b) => b[1] - a[1]);
   return `<p class="small muted">Solo se guardan conteos por mes. No hay nombres, cédulas ni respuestas individuales.</p>
-    <div class="rejilla"><label>Código del establecimiento (${R.codigoDefinido ? 'ya definido; escribe uno nuevo para cambiarlo' : 'aún no definido'})<input type="text" id="g-codigo" maxlength="20" autocomplete="off"></label></div>
-    <div><button class="btn quiet" data-act="codigo">Guardar código</button></div>
-    <p class="small muted">Las obstetras escriben este código una vez en Modo obstetra, Registro.</p>
+    ${R.codigoDefinido ? `<p><b>Código vigente:</b> <code id="g-codigo-actual">${esc(R.codigo)}</code> <button class="link" data-act="copiarcodigo">Copiar</button></p>` : '<p class="errores">Aún no hay código. Sin él, las obstetras no pueden registrar consejerías.</p>'}
+    <div class="rejilla"><label>${R.codigoDefinido ? 'Cambiar el código (de 4 a 20 caracteres)' : 'Código del establecimiento (de 4 a 20 caracteres)'}<input type="text" id="g-codigo" maxlength="20" autocomplete="off"></label></div>
+    <div class="row"><button class="btn quiet" data-act="codigo">Guardar código</button><button class="btn quiet" data-act="actualizarregistro">Actualizar conteos</button></div>
+    <p class="small muted">Las obstetras escriben este código una vez en Modo obstetra, Registro. Los conteos se cargan al abrir el panel; usa "Actualizar conteos" para ver los registros más recientes.</p>
     <h3>Pacientes que salen con un método</h3>
     ${filasRegistro() ? `<div class="tablewrap"><table><thead><tr><th>Mes</th><th>Origen</th><th>Consejerías</th><th>Con método</th><th>Aceptación</th></tr></thead><tbody>${filasRegistro()}</tbody></table></div>` : '<p class="muted small">Aún no hay registros.</p>'}
     <h3>Por qué algunas pacientes no quieren un método</h3>
@@ -168,7 +169,9 @@ document.addEventListener('click', async ev => {
   }
   if (d.act === 'restaurar') { $('#confirma').innerHTML = '<p class="errores">Esto reemplaza todo el contenido publicado. <button class="link" data-act="restaurar-si">Sí, restaurar</button></p>'; }
   if (d.act === 'restaurar-si') { try { C = await api('POST', '/api/admin/restaurar'); errores = []; sucio = false; redibujar(); toast('Contenido inicial restaurado'); } catch (e) { toast(e.message); } }
-  if (d.act === 'codigo') { try { await api('PUT', '/api/admin/codigo', {codigo: $('#g-codigo').value.trim()}); R.codigoDefinido = true; recoger(); redibujar(); toast('Código guardado'); } catch (e) { toast(e.message); } }
+  if (d.act === 'copiarcodigo') { const t = $('#g-codigo-actual').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Código copiado'), () => toast('No se pudo copiar')); return; }
+  if (d.act === 'actualizarregistro') { try { R = await api('GET', '/api/admin/registro'); recoger(); redibujar(); toast('Conteos actualizados'); } catch (e) { toast(e.message); } return; }
+  if (d.act === 'codigo') { try { const c = $('#g-codigo').value.trim(); await api('PUT', '/api/admin/codigo', {codigo: c}); R.codigoDefinido = true; R.codigo = c; recoger(); redibujar(); toast('Código guardado: ' + c); } catch (e) { toast(e.message); } }
   if (d.act === 'salir') { await api('POST', '/api/admin/salir').catch(() => {}); usuario = null; vistaEntrada(); }
 });
 window.addEventListener('beforeunload', ev => { if (sucio) ev.preventDefault(); });

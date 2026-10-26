@@ -153,7 +153,7 @@ document.addEventListener('submit', async ev => {
 });
 document.addEventListener('input', ev => { if (ev.target.closest('#f-clave, #f-entrar') || ev.target.id === 'g-codigo') return; sucio = true; const e = $('#estado'); if (e) e.textContent = 'Hay cambios sin publicar.'; });
 document.addEventListener('click', async ev => {
-  const b = ev.target.closest('button'); if (!b || b.type === 'submit') return;
+  const b = ev.target.closest('button'); if (!b || b.form) return; // los botones de los formularios (entrar, configurar, clave) los atiende el evento submit
   const d = b.dataset;
   if (d.agregar) {
     recoger(); sucio = true;

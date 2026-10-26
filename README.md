@@ -55,7 +55,7 @@ Sirve cualquier hosting con PHP 8.1 o superior y HTTPS; no necesita base de dato
 
 ### En Hostinger (cualquier plan con PHP)
 
-1. En hPanel, crea el subdominio (por ejemplo `elijo.fb-soluciones.es`) y, en Avanzado → Git, conecta este repositorio en la rama `main` con `public_html` como carpeta de destino. Cada cambio en el repositorio se publica con "Desplegar" o automáticamente.
+1. En hPanel, crea el subdominio (por ejemplo `elijo.fb-soluciones.es`) y, en Avanzado → Git, conecta este repositorio en la rama `main` con `public_html` como carpeta de destino. Con el webhook de "Auto Deployment" registrado en GitHub, cada cambio subido a `main` se publica solo en unos segundos; `version.json` muestra la fecha de la última publicación.
 2. Para crear la administradora sin terminal, crea el archivo `elijo-datos/setup.json` (carpeta hermana de `public_html`) con el contenido `{"token": "un-codigo-de-8-o-mas-caracteres"}`. Mientras no exista administradora, `/admin` muestra un formulario donde ella misma crea su usuario y su clave escribiendo ese código; el archivo se borra solo al terminar.
 3. Comprueba la persistencia: publica un cambio desde el panel, vuelve a desplegar y verifica que el cambio sigue ahí.
 

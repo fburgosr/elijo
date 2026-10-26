@@ -1,17 +1,10 @@
 {
   "name": "elijo",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Consejería anticonceptiva postparto: app para usuarias y obstetras con panel de administración",
-  "main": "server.js",
+  "description": "Consejería anticonceptiva postparto: app para usuarias y obstetras con panel de administración (servidor en PHP)",
   "scripts": {
-    "start": "node server.js",
-    "crear-admin": "node herramientas/crear-admin.js"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "express": "^4.21.2"
+    "probar": "node herramientas/probar.js",
+    "probar-rueda": "node herramientas/probar-rueda.js"
   }
 }

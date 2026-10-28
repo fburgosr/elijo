@@ -105,6 +105,11 @@ ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .mec.c1,.mec.c2{background:var(--ok-soft)} .mec.c1 .mec-n,.mec.c2 .mec-n{color:var(--ok)}
 .mec.c3{background:var(--warn-soft)} .mec.c3 .mec-n{color:var(--warn)}
 .mec.c4{background:var(--bad-soft)} .mec.c4 .mec-n{color:var(--bad)}
+.pregunta{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:.95rem}
+.pregunta.col{flex-direction:column;align-items:stretch}
+.pregunta > span:first-child{flex:1}
+.sn{display:flex;gap:6px;flex:none}
+.btn.chip{flex:0 0 auto;min-height:38px;padding:6px 14px;font-size:.88rem}
 .opt.chica{min-height:46px;padding:10px 12px;font-size:.92rem;border-width:1.5px}
 .historia{margin:0;padding-left:14px;border-left:3px solid var(--accent)}
 .sabias{background:var(--accent-soft);border-color:transparent}

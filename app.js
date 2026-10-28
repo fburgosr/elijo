@@ -109,7 +109,7 @@ function opciones(a, hoy, lista){
 const hoy = new Date(); hoy.setHours(0,0,0,0);
 const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 const EJEMPLO = {general:false, embarazada:false, nacimiento: iso(new Date(hoy.getTime() - 21*DIA)), parto:'normal', alimento:'pecho', regla:'no', deseo:'anios', importa:['nodiario'], condiciones:[], ejemplo:true};
-let S = {rueda:{momento:'I', sel:new Set(), abierto:0}, dato:0, codigo:'', registradas:0, reg:{fase:'app', metodo:null}, vista:'inicio', paso:0, a:{...EJEMPLO}, metodo:null, comparar:[], favoritos:[], dudas:[], mito:0, mitoVisto:false, obst:'rueda', lista:[]};
+let S = {guion:{momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:false}, rueda:{momento:'I', sel:new Set(), abierto:0}, dato:0, codigo:'', registradas:0, reg:{fase:'app', metodo:null}, vista:'inicio', paso:0, a:{...EJEMPLO}, metodo:null, comparar:[], favoritos:[], dudas:[], mito:0, mitoVisto:false, obst:'guion', lista:[]};
 try { const g = JSON.parse(localStorage.getItem('elijo') || 'null'); if (g && g.a) { S.a = g.a; S.favoritos = g.favoritos || []; } } catch(e){}
 try { S.codigo = localStorage.getItem('elijo-codigo') || ''; S.centro = localStorage.getItem('elijo-centro') || ''; } catch(e){}
 const guardar = () => { try { localStorage.setItem('elijo', JSON.stringify({a:S.a, favoritos:S.favoritos})); } catch(e){} };
@@ -391,12 +391,51 @@ function prellenarRueda(){
   fila(d < 2 ? 'Inserción de DIU: menos de 48 horas posparto, ' + (lacta ? 'con' : 'sin') + ' lactancia' : d < 28 ? 'Inserción de DIU: de 48 horas a menos de 4 semanas' : 'Inserción de DIU: 4 semanas o más');
   return sel;
 }
-function vRueda(){
-  const R = S.rueda, res = mecEvaluar([...R.sel], R.momento);
+function celdasMec(res){
   const txt = ['', 'Se puede usar', 'En general se puede usar', 'No se recomienda, salvo que no haya otro método', 'No usar'];
-  const celdas = MEC.columnas.map((c, i) => { const r = res[i];
+  return MEC.columnas.map((c, i) => { const r = res[i];
     return '<div class="mec c' + r.rango + '"><span class="mec-n">' + (r.rango ? r.texto + (r.aclarar ? '*' : '') : '–') + '</span><span class="mec-t"><b>' + c.t + '</b><br>' +
       (r.rango ? txt[r.rango] + (r.rango >= 2 ? '<br><span class="small">Por: ' + r.causas.join('; ') + '</span>' : '') : 'Sin categoría para lo marcado') + '</span></div>'; }).join('');
+}
+/* ----- Guion de consulta: preguntas por tema (guion.js) que resuelven la rueda ----- */
+function posDesdePaciente(){
+  const a = S.a, d = dias(a, hoy);
+  if (a.ejemplo) return null;
+  return {tiempo: a.general ? 'no' : a.embarazada ? 'pre' : d < 2 ? '48h' : d < 21 ? '3sem' : d < 42 ? '6sem' : d < 183 ? '6m' : 'mas', lacta: !a.general && a.alimento !== 'formula', tev: false, sepsis: false};
+}
+function vGuion(){
+  const G = S.guion, filas = guionFilas(G.resp, G.pos), res = mecEvaluar(filas, G.momento);
+  const TIEMPOS = [['pre','Aún embarazada'],['48h','Menos de 48 horas'],['3sem','48 horas a 3 semanas'],['6sem','3 a 6 semanas'],['6m','6 semanas a 6 meses'],['mas','Más de 6 meses'],['no','No está en posparto']];
+  const chip = (attr, val, actual, t) => '<button class="btn seg chip ' + (actual === val ? '' : 'quiet') + '" data-' + attr + '="' + val + '">' + t + '</button>';
+  const sn = (attr, val, actual) => '<span class="sn">' + chip(attr, val + ':no', actual === 'no' || actual === undefined ? val + ':no' : '', 'No') + chip(attr, val + ':si', actual !== undefined && actual !== 'no' ? val + ':si' : '', 'Sí') + '</span>';
+  const esPos = G.pos.tiempo && G.pos.tiempo !== 'no' && G.pos.tiempo !== 'pre';
+  let posparto = '<div class="panel stack"><h3>1. Situación posparto</h3><p class="small muted">¿Cuánto tiempo ha pasado desde el parto?</p><div class="row">' + TIEMPOS.map(([v, t]) => chip('gtiempo', v, G.pos.tiempo, t)).join('') + '</div>';
+  if (esPos){
+    posparto += '<div class="pregunta"><span>¿Está dando de lactar?</span>' + sn('gpos', 'lacta', G.pos.lacta ? 'si' : 'no') + '</div>';
+    if (!G.pos.lacta && (G.pos.tiempo === '48h' || G.pos.tiempo === '3sem' || G.pos.tiempo === '6sem')) posparto += '<div class="pregunta"><span>Sin lactancia: ¿tiene otros factores de riesgo de trombosis (cesárea, transfusión, hemorragia, preeclampsia, obesidad, tabaco, inmovilidad)?</span>' + sn('gpos', 'tev', G.pos.tev ? 'si' : 'no') + '</div>';
+    posparto += '<div class="pregunta"><span>¿Sepsis puerperal?</span>' + sn('gpos', 'sepsis', G.pos.sepsis ? 'si' : 'no') + '</div>';
+  }
+  posparto += (posDesdePaciente() ? '<button class="link" data-act="gprellenar">Usar las respuestas de la paciente</button>' : '') + '</div>';
+  const grupos = GUION.grupos.map((g, gi) => {
+    const pregs = g.preguntas.filter(q => !q.soloGeneral || G.pos.tiempo === 'no');
+    const n = pregs.filter(q => { const r = G.resp[q.id]; return r !== undefined && r !== 'no' && r !== 'si'; }).length + pregs.filter(q => !q.opciones && G.resp[q.id] === 'si').length;
+    const ab = G.grupo === gi;
+    return '<div class="panel stack"><button class="acc" data-ggrupo="' + gi + '" aria-expanded="' + ab + '"><span>' + (gi + 2) + '. ' + g.g + (n ? ' <span class="pill tag">' + n + '</span>' : '') + '</span><span aria-hidden="true">' + (ab ? '−' : '+') + '</span></button>' +
+      (ab ? pregs.map(q => { const r = G.resp[q.id];
+        if (q.tipo === 'una') return '<div class="pregunta col"><span>' + q.q + '</span><div class="row">' + q.opciones.map((o, i) => chip('gop', q.id + ':' + i, r !== undefined ? q.id + ':' + r : '', o.t)).join('') + '</div></div>';
+        return '<div class="pregunta' + (q.opciones && r !== undefined && r !== 'no' ? ' col' : '') + '"><span>' + q.q + (q.nota ? '<br><span class="small muted">' + q.nota + '</span>' : '') + '</span>' + sn('gsn', q.id, r) +
+          (q.opciones && r !== undefined && r !== 'no' ? '<div class="stack">' + q.opciones.map((o, i) => '<button class="opt chica" data-gop="' + q.id + ':' + i + '" aria-pressed="' + (String(r) === String(i)) + '"><span class="tick">' + (String(r) === String(i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>' : '') + '</div>'; }).join('') : '') + '</div>'; }).join('');
+  return '<div class="panel stack"><h3>Guion de consulta</h3><p class="small muted">Pregunte en orden; solo cuando la respuesta es "Sí" se abren las opciones de ese tema. El resultado se actualiza con cada respuesta.</p>' +
+    '<div class="row">' + [['I','Va a iniciar el método'],['C','Ya lo usa y continúa']].map(([k, t]) => '<button class="btn seg ' + (G.momento === k ? '' : 'quiet') + '" data-gmomento="' + k + '">' + t + '</button>').join('') + '</div>' +
+    '<div class="mecs">' + celdasMec(res) + '</div>' +
+    '<p class="small muted">' + filas.length + ' condición(es) consideradas. * La guía pide leer la aclaración de esa categoría. Un valor como 3/4 depende de la gravedad.</p>' +
+    '<div class="row"><button class="btn quiet" data-act="glimpiar">Nueva paciente</button><button class="btn quiet" data-obst="rueda">Ver la tabla completa de la OMS</button></div></div>' +
+    posparto + grupos +
+    '<p class="small muted">Fuente: ' + MEC.fuente + ' Con varias condiciones, la categoría mostrada es un mínimo y no reemplaza el juicio clínico. No incluye métodos de barrera, esterilización ni anticoncepción de emergencia.</p>';
+}
+function vRueda(){
+  const R = S.rueda, res = mecEvaluar([...R.sel], R.momento);
+  const celdas = celdasMec(res);
   const grupos = MEC.grupos.map((g, gi) => { const n = g.filas.filter((f, fi) => R.sel.has(gi + '.' + fi)).length, ab = R.abierto === gi;
     return '<div class="panel stack"><button class="acc" data-rgrupo="' + gi + '" aria-expanded="' + ab + '"><span>' + g.g + (n ? ' <span class="pill tag">' + n + '</span>' : '') + '</span><span aria-hidden="true">' + (ab ? '−' : '+') + '</span></button>' +
       (ab ? g.filas.map((f, fi) => { const id = gi + '.' + fi, on = R.sel.has(id); return '<button class="opt chica" data-rfila="' + id + '" aria-pressed="' + on + '"><span class="tick">' + (on ? '✓' : '') + '</span>' + f[0] + '</button>'; }).join('') : '') + '</div>'; }).join('');
@@ -409,8 +448,9 @@ function vRueda(){
     '<p class="small muted">Fuente: ' + MEC.fuente + ' Cuando hay varias condiciones, la guía pide valorarlas en conjunto: la categoría mostrada es un mínimo, no reemplaza el juicio clínico. No incluye métodos de barrera, esterilización ni anticoncepción de emergencia.</p>';
 }
 function vObstetra(){
+  if (!S.guion.prellenado){ const p = posDesdePaciente(); if (p) S.guion.pos = p; S.guion.prellenado = true; }
   const d = dias(S.a, hoy), col = S.a.general ? 0 : S.a.embarazada ? 1 : d < 42 ? 1 : d < 183 ? 2 : 3;
-  const seg = ['rueda','tabla','laminas','lista','registro'].map((k, i) => '<button class="btn seg ' + (S.obst === k ? '' : 'quiet') + '" data-obst="' + k + '">' + ['Rueda','Posparto','Láminas','Consejería','Registro'][i] + '</button>').join('');
+  const seg = ['guion','tabla','laminas','lista','registro'].map((k, i) => '<button class="btn seg ' + (S.obst === k ? '' : 'quiet') + '" data-obst="' + k + '">' + ['Guion','Posparto','Láminas','Consejería','Registro'][i] + '</button>').join('');
   let c = '';
   if (S.obst === 'tabla') c = '<div class="panel stack"><h3>Elegibilidad en mujeres que lactan</h3><div class="tablewrap"><table><thead><tr><th>Método</th><th>0 a 6 sem</th><th>6 sem a 6 m</th><th>Más de 6 m</th></tr></thead><tbody>' +
     TABLA.map(r => '<tr><td>' + r[0] + '</td>' + [1,2,3].map(i => '<td class="c c' + r[i][0] + (i === col ? ' now' : '') + '">' + r[i] + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' +
@@ -418,6 +458,7 @@ function vObstetra(){
   if (S.obst === 'laminas') c = '<div class="stack">' + activos().map(m => '<button class="card" data-metodo="' + m.id + '" data-volver="obstetra">' + ico(m.id) + '<span class="body"><h3>' + m.nombre + '</h3><span class="muted small">' + m.apodo + '</span></span></button>').join('') + '</div>';
   if (S.obst === 'registro') c = vRegistro();
   if (S.obst === 'rueda') c = vRueda();
+  if (S.obst === 'guion') c = vGuion();
   if (S.obst === 'lista') c = '<div class="panel"><h3>Pasos de la consejería</h3>' + LISTA.map((t, i) => '<label class="check" for="chk' + i + '"><input type="checkbox" id="chk' + i + '" data-chk="' + i + '"' + (S.lista.includes(i) ? ' checked' : '') + '><span>' + t + '</span></label>').join('') + '<p class="small muted" style="padding-top:10px">' + S.lista.length + ' de ' + LISTA.length + ' pasos. No se guarda ningún dato de la paciente.</p></div>';
   return cabecera('<button class="link" data-go="resumen">Resumen de la paciente</button>') + '<div class="stack"><h2>Modo obstetra</h2><p class="muted">Apoyo visual para la consulta.</p></div><div class="row">' + seg + '</div>' + c + '<a class="btn quiet wide" href="/admin">Administración del contenido</a>';
 }
@@ -446,6 +487,12 @@ document.addEventListener('click', ev => {
   if (d.duda || d.dudatxt){ const t = d.dudatxt || crudo(MITOS[+d.duda].q); if (!S.dudas.includes(t)) S.dudas.push(t); return toast('Guardada en tu resumen'); }
   if (d.temor){ S.temor = S.temor === +d.temor ? null : +d.temor; return render(); }
   if (d.motivo !== undefined) return elegirMotivo(d.motivo);
+  if (d.gtiempo){ S.guion.pos.tiempo = d.gtiempo; return render(); }
+  if (d.gpos){ const [k, v] = d.gpos.split(':'); S.guion.pos[k] = v === 'si'; return render(); }
+  if (d.gsn){ const [q, v] = d.gsn.split(':'); S.guion.resp[q] = v; return render(); }
+  if (d.gop){ const i = d.gop.lastIndexOf(':'); S.guion.resp[d.gop.slice(0, i)] = d.gop.slice(i + 1); return render(); }
+  if (d.ggrupo !== undefined){ S.guion.grupo = S.guion.grupo === +d.ggrupo ? -1 : +d.ggrupo; return render(); }
+  if (d.gmomento){ S.guion.momento = d.gmomento; return render(); }
   if (d.rgrupo !== undefined){ S.rueda.abierto = S.rueda.abierto === +d.rgrupo ? -1 : +d.rgrupo; return render(); }
   if (d.rfila){ const s = S.rueda.sel; s.has(d.rfila) ? s.delete(d.rfila) : s.add(d.rfila); return render(); }
   if (d.rmomento){ S.rueda.momento = d.rmomento; return render(); }
@@ -457,6 +504,8 @@ document.addEventListener('click', ev => {
     case 'plan': S.paso = 0; a.general = false; a.embarazada = true; S.plan = true; return ir('preguntas');
     case 'registrar': return registrarConsejeria();
     case 'reintentar': vaciarCola().then(() => { toast(leerCola().length ? 'Siguen pendientes; revisa la conexión' : 'Todo enviado'); render(); }); return;
+    case 'glimpiar': S.guion = {momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:true}; return render();
+    case 'gprellenar': { const p = posDesdePaciente(); if (!p) return toast('La paciente aún no ha respondido el cuestionario'); S.guion.pos = p; toast('Situación posparto tomada de sus respuestas'); return render(); }
     case 'rprellenar': { const p = prellenarRueda(); if (!p.size) return toast('La paciente aún no ha respondido el cuestionario de posparto'); p.forEach(x => S.rueda.sel.add(x)); return render(); }
     case 'rlimpiar': S.rueda.sel.clear(); return render();
     case 'calendario': return calendario();

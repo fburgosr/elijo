@@ -36,5 +36,20 @@ const r = mecEvaluar([id('Lactancia: 6 meses o más posparto'), id('Diabetes con
 ok('la causa de la categoría más alta se informa', r[0].texto === '3/4' && r[0].causas.length === 1 && r[0].causas[0].startsWith('Diabetes'));
 ok('sin condiciones no hay categoría', mecEvaluar([], 'I').every(x => x.rango === 0));
 
+// Guion de consulta: cada opción apunta a filas que existen; la situación posparto produce las filas correctas.
+require('../guion.js');
+const { GUION, guionFilas, guionPosparto } = window;
+const existe = id => { const [g, f] = id.split('.').map(Number); return !!(MEC.grupos[g] && MEC.grupos[g].filas[f]); };
+const refs = GUION.grupos.flatMap(g => g.preguntas.flatMap(q => q.opciones ? q.opciones.flatMap(o => o.filas) : q.filas));
+ok(`las ${refs.length} referencias del guion apuntan a filas existentes`, refs.every(existe));
+const idsPreg = GUION.grupos.flatMap(g => g.preguntas.map(q => q.id));
+ok('no hay preguntas repetidas en el guion', new Set(idsPreg).size === idsPreg.length);
+ok('posparto: 3 semanas con lactancia', guionPosparto({ tiempo: '6sem', lacta: true }).join(' ') === '0.0 0.11');
+ok('posparto: 10 días sin lactancia con riesgo de trombosis', guionPosparto({ tiempo: '3sem', lacta: false, tev: true }).join(' ') === '0.4 0.10');
+ok('posparto: primeras 48 horas con lactancia y sepsis', guionPosparto({ tiempo: '48h', lacta: true, sepsis: true }).join(' ') === '0.0 0.8 0.12');
+ok('fuera del posparto no se añaden filas de posparto', guionPosparto({ tiempo: 'no' }).length === 0);
+const filasGuion = guionFilas({ edad: '2', hta: '2', cefalea: 'no', lupus: 'si' }, { tiempo: '6m', lacta: true });
+ok('las respuestas del guion se convierten en filas', filasGuion.join(' ') === '0.1 0.11 1.3 2.4');
+ok('guion: lactancia 6 semanas a 6 meses + presión 160/100 da 4 4 2 3 2 1 2', mecEvaluar(filasGuion, 'I').map(r => r.rango).join(' ') === '4 4 2 3 2 1 2');
 console.log(fallos ? fallos + ' prueba(s) fallaron' : 'Todas las pruebas de la rueda pasaron');
 process.exit(fallos ? 1 : 0);

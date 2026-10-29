@@ -138,4 +138,5 @@ ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .opt.chica{min-height:46px;padding:10px 12px;font-size:.92rem;border-width:1.5px}
 .historia{margin:0;padding-left:14px;border-left:3px solid var(--accent)}
 .sabias{background:var(--accent-soft);border-color:transparent}
+.toast .link{color:inherit;text-decoration:underline;font-weight:700;padding:0 0 0 6px;font-size:inherit}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.9rem}

@@ -584,6 +584,7 @@ document.addEventListener('click', ev => {
     case 'plan': S.paso = 0; a.general = false; a.embarazada = true; S.plan = true; return ir('preguntas');
     case 'registrar': return registrarConsejeria();
     case 'reintentar': vaciarCola().then(() => { toast(leerCola().length ? 'Siguen pendientes; revisa la conexión' : 'Todo enviado'); render(); }); return;
+    case 'recargar': location.reload(); return;
     case 'asisatras': if (S.asis.i > 0){ S.asis.i--; S.asis.anim = true; } return render();
     case 'asissig': S.asis.i++; S.asis.anim = true; return render();
     case 'asisnueva': S.guion = {momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:true}; S.asis = {i:0, sel:null, prev:null, anim:true, toc:{}}; return render();
@@ -637,4 +638,10 @@ render();
 cargarContenido().then(c => iniciar(sanear(c))).catch(() => {
   document.querySelector('#app').innerHTML = '<p>No se pudo cargar la app. Revisa tu conexión y vuelve a intentar.</p>';
 });
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+function avisoVersion(){ const e = document.getElementById('toast'); e.innerHTML = 'Hay una versión nueva de Elijo. <button class="link" data-act="recargar">Actualizar</button>'; e.hidden = false; }
+if ('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  // Cuando se publica una versión nueva, el teléfono que ya tenía la app abierta recibe un aviso para recargar.
+  let habia = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!habia){ habia = true; return; } avisoVersion(); });
+}

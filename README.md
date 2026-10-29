@@ -27,6 +27,8 @@ El método de lactancia y amenorrea viene desactivado. Se activa en Métodos.
 
 En Ayuda la usuaria elige el tema: como el teléfono, claro u oscuro (`tema.js`, guardado en el propio teléfono).
 
+Cada publicación nueva llega sola a los teléfonos: si la app estaba abierta, muestra el aviso "Hay una versión nueva" con un botón para actualizar.
+
 ## Qué no se configura desde el panel
 
 Las reglas clínicas de elegibilidad (qué método se recomienda según semanas postparto, lactancia y condiciones de salud) están en `app.js`, en la función `estado`. Cambiarlas requiere revisión clínica y un cambio de código, no un clic.

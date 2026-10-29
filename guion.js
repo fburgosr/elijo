@@ -5,11 +5,11 @@ window.GUION = {
   grupos: [
     {id: 'general', g: 'Datos generales', preguntas: [
       {id: 'edad', q: '¿Qué edad tiene?', tipo: 'una', opciones: [
-        {t: 'Menos de 18 años', filas: ['1.1']}, {t: '18 a 19 años', filas: ['1.2']}, {t: '20 a 39 años', filas: ['1.3']},
+        {t: 'Menos de 18 años', filas: ['1.1']}, {t: '18 a 19 años', filas: ['1.2']}, {t: '20 a 34 años', filas: ['1.3']}, {t: '35 a 39 años', filas: ['1.3']},
         {t: '40 a 45 años', filas: ['1.4']}, {t: 'Más de 45 años', filas: ['1.5']}]},
       {id: 'fuma', q: '¿Fuma?', opciones: [
-        {t: 'Sí, y tiene menos de 35 años', filas: ['1.13']}, {t: 'Sí, 35 años o más, menos de 15 cigarrillos al día', filas: ['1.14']},
-        {t: 'Sí, 35 años o más, 15 cigarrillos o más al día', filas: ['1.15']}]},
+        {t: 'Sí, y tiene menos de 35 años', filas: ['1.13'], edad: '<35'}, {t: 'Sí, 35 años o más, menos de 15 cigarrillos al día', tc: 'Menos de 15 cigarrillos al día', filas: ['1.14'], edad: '>=35'},
+        {t: 'Sí, 35 años o más, 15 cigarrillos o más al día', tc: '15 cigarrillos o más al día', filas: ['1.15'], edad: '>=35'}]},
       {id: 'imc', q: '¿Tiene obesidad (IMC de 30 o más)?', opciones: [
         {t: 'Sí, y tiene 18 años o más', filas: ['1.16']}, {t: 'Sí, y tiene menos de 18 años', filas: ['1.17']}]},
       {id: 'partos', q: '¿Nunca ha tenido un parto?', filas: ['1.6'], soloGeneral: true},
@@ -41,7 +41,7 @@ window.GUION = {
     {id: 'neuro', g: 'Dolor de cabeza, epilepsia, lupus y ánimo', preguntas: [
       {id: 'cefalea', q: '¿Dolores de cabeza frecuentes o migraña?', opciones: [
         {t: 'Migraña con aura (ve luces o destellos antes del dolor)', filas: ['4.3']},
-        {t: 'Migraña sin aura, menos de 35 años', filas: ['4.1']}, {t: 'Migraña sin aura, 35 años o más', filas: ['4.2']},
+        {t: 'Migraña sin aura, menos de 35 años', tc: 'Migraña sin aura', filas: ['4.1'], edad: '<35'}, {t: 'Migraña sin aura, 35 años o más', tc: 'Migraña sin aura', filas: ['4.2'], edad: '>=35'},
         {t: 'Dolor de cabeza común, no migraña', filas: ['4.0']}]},
       {id: 'epilepsia', q: '¿Epilepsia?', filas: ['4.4'], nota: 'Si toma anticonvulsivantes, respóndalo también en Medicamentos.'},
       {id: 'lupus', q: '¿Lupus?', opciones: [
@@ -118,12 +118,16 @@ window.guionPosparto = function (p) {
 };
 
 /* Convierte las respuestas del guion en filas: resp[idPregunta] = 'no' | 'si' | índice de la opción elegida. */
+// Edad conocida por el guion: '<35', '>=35' o '' si aún no se respondió. Evita volver a preguntar la edad en tabaco y migraña.
+window.guionEdad = function(resp){ const e = resp.edad; if (e === undefined || e === 'no' || e === 'si') return ''; return Number(e) <= 2 ? '<35' : '>=35'; };
+// Opciones visibles de una pregunta según la edad ya respondida; si solo queda una, la app la marca sola al responder "Sí".
+window.guionOpciones = function(q, resp){ const e = window.guionEdad(resp); return q.opciones.map((o, i) => ({i, t: e && o.edad && o.tc ? o.tc : o.t, edad: o.edad, filas: o.filas})).filter(o => !e || !o.edad || o.edad === e); };
 window.guionFilas = function (resp, posparto) {
   const f = window.guionPosparto(posparto);
   for (const g of window.GUION.grupos) for (const q of g.preguntas) {
     const r = resp[q.id];
     if (r === undefined || r === 'no' || r === '') continue;
-    if (q.opciones) { const o = q.opciones[Number(r)]; if (o) f.push(...o.filas); }
+    if (q.opciones) { const o = q.opciones[Number(r)], e = window.guionEdad(resp); if (o && (!o.edad || !e || o.edad === e)) f.push(...o.filas); }
     else if (r === 'si') f.push(...q.filas);
   }
   return [...new Set(f)];

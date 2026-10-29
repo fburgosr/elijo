@@ -319,7 +319,7 @@ function vResumen(){
     '<div class="stack"><button class="btn wide" data-act="copiar">Copiar mi resumen</button><button class="btn quiet wide" data-act="borrar">Borrar mis respuestas</button></div>';
 }
 function vAyuda(){
-  return cabecera() + '<h2>Ayuda</h2>' +
+  return cabecera() + '<h2>Ayuda</h2>' + panelTema() +
     '<div class="alarm stack"><h3>Señales de alarma después del parto</h3>' + alarmasHtml + '<p><b>Acude de inmediato al centro de salud o llama al 911.</b></p></div>' +
     '<div class="panel stack"><h3>Anticoncepción de emergencia</h3><p>Si tuviste una relación sin protección, la pastilla de emergencia sirve hasta 5 días después. Mientras antes, mejor.</p><p>En el MSP se entrega gratis, sin receta, sin cita y a cualquier edad.</p></div>' +
     '<div class="panel stack"><h3>Videos guía</h3>' + (CFG.videos.length ? CFG.videos.map(linkVideo).join('') + '<p class="small muted">Se abren en otra pestaña.</p>' : '<p class="muted">Aún no hay videos. Pronto habrá videos aquí.</p>') + '</div>' +
@@ -424,7 +424,7 @@ function vGuion(){
       (ab ? pregs.map(q => { const r = G.resp[q.id];
         if (q.tipo === 'una') return '<div class="pregunta col"><span>' + q.q + '</span><div class="row">' + q.opciones.map((o, i) => chip('gop', q.id + ':' + i, r !== undefined ? q.id + ':' + r : '', o.t)).join('') + '</div></div>';
         return '<div class="pregunta' + (q.opciones && r !== undefined && r !== 'no' ? ' col' : '') + '"><span>' + q.q + (q.nota ? '<br><span class="small muted">' + q.nota + '</span>' : '') + '</span>' + sn('gsn', q.id, r) +
-          (q.opciones && r !== undefined && r !== 'no' ? '<div class="stack">' + q.opciones.map((o, i) => '<button class="opt chica" data-gop="' + q.id + ':' + i + '" aria-pressed="' + (String(r) === String(i)) + '"><span class="tick">' + (String(r) === String(i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>' : '') + '</div>'; }).join('') : '') + '</div>'; }).join('');
+          (q.opciones && r !== undefined && r !== 'no' ? '<div class="stack">' + guionOpciones(q, G.resp).map(o => '<button class="opt chica" data-gop="' + q.id + ':' + o.i + '" aria-pressed="' + (String(r) === String(o.i)) + '"><span class="tick">' + (String(r) === String(o.i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>' : '') + '</div>'; }).join('') : '') + '</div>'; }).join('');
   return '<div class="panel stack"><h3>Guion de consulta</h3><p class="small muted">Pregunte en orden; solo cuando la respuesta es "Sí" se abren las opciones de ese tema. El resultado se actualiza con cada respuesta.</p>' +
     '<div class="row">' + [['I','Va a iniciar el método'],['C','Ya lo usa y continúa']].map(([k, t]) => '<button class="btn seg ' + (G.momento === k ? '' : 'quiet') + '" data-gmomento="' + k + '">' + t + '</button>').join('') + '</div>' +
     '<div class="mecs">' + celdasMec(res) + '</div>' +
@@ -450,6 +450,10 @@ function vRueda(){
 /* ----- Modo Rueda: anillo animado + guion pregunta a pregunta (mismas respuestas que el guion) ----- */
 const TIEMPOS_ASIS = [['pre','Aún embarazada'],['48h','Menos de 48 horas'],['3sem','48 horas a 3 semanas'],['6sem','3 a 6 semanas'],['6m','6 semanas a 6 meses'],['mas','Más de 6 meses'],['no','No está en posparto']];
 const ABREV = ['AOC', 'INY', 'PPS', 'DMPA', 'IMP', 'Cu', 'LNG'];
+// Al responder "Sí", si por la edad solo queda una opción de detalle, se marca sola.
+function unicaOpcion(qid, v){ if (v !== 'si') return v; const q = GUION.grupos.flatMap(g => g.preguntas).find(x => x.id === qid); if (!q || !q.opciones) return v; const ops = guionOpciones(q, S.guion.resp); return ops.length === 1 ? String(ops[0].i) : v; }
+function temaActual(){ try { return localStorage.getItem('elijo-tema') || 'sistema'; } catch(e){ return 'sistema'; } }
+function panelTema(){ return '<div class="panel stack"><h3>Apariencia</h3><div class="row">' + [['sistema','Como el teléfono'],['claro','Claro'],['oscuro','Oscuro']].map(([k, t]) => '<button class="btn seg chip ' + (temaActual() === k ? '' : 'quiet') + '" data-tema="' + k + '">' + t + '</button>').join('') + '</div></div>'; }
 function pasosAsistente(){
   const G = S.guion, p = G.pos, pasos = [{tipo:'tiempo'}];
   const esPos = p.tiempo && p.tiempo !== 'no' && p.tiempo !== 'pre';
@@ -498,7 +502,7 @@ function vAsistente(){
       if (q.tipo === 'una') cuerpo = '<div class="row">' + q.opciones.map((o, i) => chipA(String(i), r === undefined ? '' : String(r), o.t, 'op:' + q.id + ':' + i)).join('') + '</div>';
       else {
         cuerpo = (q.nota ? '<p class="small muted">' + q.nota + '</p>' : '') + '<div class="row dos">' + grande('sn:' + q.id + ':no', 'No', r === 'no') + grande('sn:' + q.id + ':si', 'Sí', r !== undefined && r !== 'no') + '</div>';
-        if (q.opciones && r !== undefined && r !== 'no') cuerpo += '<p class="small muted">¿Cuál de estas?</p><div class="stack">' + q.opciones.map((o, i) => '<button class="opt chica" data-asis="op:' + q.id + ':' + i + '" aria-pressed="' + (String(r) === String(i)) + '"><span class="tick">' + (String(r) === String(i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>';
+        if (q.opciones && r !== undefined && r !== 'no') cuerpo += '<p class="small muted">¿Cuál de estas?</p><div class="stack">' + guionOpciones(q, G.resp).map(o => '<button class="opt chica" data-asis="op:' + q.id + ':' + o.i + '" aria-pressed="' + (String(r) === String(o.i)) + '"><span class="tick">' + (String(r) === String(o.i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>';
       }
     }
     tarjeta = '<div class="paso' + (A.anim ? ' entra' : '') + '"><div class="progreso"><i style="width:' + Math.round(A.i / pasos.length * 100) + '%"></i></div><p class="muted small">' + grupo + ' · ' + (A.i + 1) + ' de ' + pasos.length + '</p><h3>' + titulo + '</h3>' + cuerpo +
@@ -537,7 +541,7 @@ function render(){
 }
 function ir(v){ S.vista = v; render(); window.scrollTo(0, 0); }
 let tt; function toast(t){ const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(tt); tt = setTimeout(() => e.hidden = true, 2200); }
-function tomarFecha(){ const f = $('#f-nac'); if (f && f.value){ S.a.nacimiento = f.value; S.a.embarazada = false; } }
+function tomarFecha(){ const f = $('#f-nac'); if (f && f.value){ if (f.value > iso(hoy)) f.value = iso(hoy); S.a.nacimiento = f.value; S.a.embarazada = false; } }
 
 document.addEventListener('click', ev => {
   const b = ev.target.closest('button'); if (!b) return;
@@ -551,20 +555,21 @@ document.addEventListener('click', ev => {
   if (d.duda || d.dudatxt){ const t = d.dudatxt || crudo(MITOS[+d.duda].q); if (!S.dudas.includes(t)) S.dudas.push(t); return toast('Guardada en tu resumen'); }
   if (d.temor){ S.temor = S.temor === +d.temor ? null : +d.temor; return render(); }
   if (d.motivo !== undefined) return elegirMotivo(d.motivo);
+  if (d.tema){ aplicarTema(d.tema); return render(); }
   if (d.sector !== undefined){ S.asis.sel = S.asis.sel === +d.sector ? null : +d.sector; return render(); }
   if (d.asis){
     const A = S.asis, G = S.guion, partes = d.asis.split(':'), k = partes[0];
     const avanzar = () => { A.i++; A.anim = true; };
     if (k === 'tiempo'){ G.pos.tiempo = partes[1]; avanzar(); }
     else if (k === 'pos'){ G.pos[partes[1]] = partes[2] === 'si'; A.toc[partes[1]] = true; avanzar(); }
-    else if (k === 'sn'){ G.resp[partes[1]] = partes[2]; const q = GUION.grupos.flatMap(g => g.preguntas).find(x => x.id === partes[1]); if (partes[2] === 'no' || !q.opciones) avanzar(); }
+    else if (k === 'sn'){ const v = unicaOpcion(partes[1], partes[2]); G.resp[partes[1]] = v; const q = GUION.grupos.flatMap(g => g.preguntas).find(x => x.id === partes[1]); if (v !== 'si' || !q.opciones) avanzar(); }
     else if (k === 'op'){ G.resp[partes[1]] = partes[2]; avanzar(); }
     else if (k === 'ir'){ A.i = +partes[1]; A.anim = true; }
     return render();
   }
   if (d.gtiempo){ S.guion.pos.tiempo = d.gtiempo; return render(); }
   if (d.gpos){ const [k, v] = d.gpos.split(':'); S.guion.pos[k] = v === 'si'; return render(); }
-  if (d.gsn){ const [q, v] = d.gsn.split(':'); S.guion.resp[q] = v; return render(); }
+  if (d.gsn){ const [q, v] = d.gsn.split(':'); S.guion.resp[q] = unicaOpcion(q, v); return render(); }
   if (d.gop){ const i = d.gop.lastIndexOf(':'); S.guion.resp[d.gop.slice(0, i)] = d.gop.slice(i + 1); return render(); }
   if (d.ggrupo !== undefined){ S.guion.grupo = S.guion.grupo === +d.ggrupo ? -1 : +d.ggrupo; return render(); }
   if (d.gmomento){ S.guion.momento = d.gmomento; return render(); }
@@ -624,7 +629,7 @@ document.addEventListener('click', ev => {
 document.addEventListener('change', ev => {
   const c = ev.target.dataset && ev.target.dataset.chk;
   if (c !== undefined){ const n = +c, i = S.lista.indexOf(n); i < 0 ? S.lista.push(n) : S.lista.splice(i, 1); render(); }
-  if (ev.target.id === 'f-nac' && ev.target.value){ S.a.nacimiento = ev.target.value; S.a.embarazada = false; render(); }
+  if (ev.target.id === 'f-nac' && ev.target.value){ if (ev.target.value > iso(hoy)){ ev.target.value = iso(hoy); toast('La fecha del parto no puede ser futura'); } S.a.nacimiento = ev.target.value; S.a.embarazada = false; render(); }
 });
 render();
 

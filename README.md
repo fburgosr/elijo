@@ -25,13 +25,15 @@ php -S localhost:3000 router.php
 
 El método de lactancia y amenorrea viene desactivado. Se activa en Métodos.
 
+En Ayuda la usuaria elige el tema: como el teléfono, claro u oscuro (`tema.js`, guardado en el propio teléfono).
+
 ## Qué no se configura desde el panel
 
 Las reglas clínicas de elegibilidad (qué método se recomienda según semanas postparto, lactancia y condiciones de salud) están en `app.js`, en la función `estado`. Cambiarlas requiere revisión clínica y un cambio de código, no un clic.
 
 ## Guion de consulta y rueda de elegibilidad
 
-El modo obstetra abre con la pestaña Rueda: un anillo de siete sectores (uno por método) que se colorea con la categoría de la OMS a medida que la obstetra responde el guion pregunta a pregunta, con botones grandes No/Sí y barra de progreso. Tocar un sector muestra la categoría y la causa. Las animaciones se desactivan si el teléfono tiene activada la opción de reducir movimiento. Las respuestas son las mismas del guion en lista, así que se puede cambiar de una vista a otra sin perder nada.
+El modo obstetra abre con la pestaña Rueda: un anillo de siete sectores (uno por método) que se colorea con la categoría de la OMS a medida que la obstetra responde el guion pregunta a pregunta, con botones grandes No/Sí y barra de progreso. Tocar un sector muestra la categoría y la causa. Las animaciones se desactivan si el teléfono tiene activada la opción de reducir movimiento. Si la edad ya se respondió, las preguntas de tabaco y migraña no la vuelven a pedir. Las respuestas son las mismas del guion en lista, así que se puede cambiar de una vista a otra sin perder nada.
 
 La pestaña Guion muestra el mismo guion de consulta como lista (`guion.js`): unas 25 preguntas de cribado agrupadas por tema (posparto y lactancia, datos generales, presión y corazón, cefalea y lupus, sangrado y mama, diabetes e hígado, VIH y medicamentos). Solo cuando la respuesta es "Sí" se abren las opciones de detalle, y cada opción apunta a filas de la tabla de la OMS. El resultado por método se actualiza con cada respuesta. La tabla completa sigue disponible desde el guion.
 

@@ -51,5 +51,8 @@ ok('fuera del posparto no se añaden filas de posparto', guionPosparto({ tiempo:
 const filasGuion = guionFilas({ edad: '2', hta: '2', cefalea: 'no', lupus: 'si' }, { tiempo: '6m', lacta: true });
 ok('las respuestas del guion se convierten en filas', filasGuion.join(' ') === '0.1 0.11 1.3 2.4');
 ok('guion: lactancia 6 semanas a 6 meses + presión 160/100 da 4 4 2 3 2 1 2', mecEvaluar(filasGuion, 'I').map(r => r.rango).join(' ') === '4 4 2 3 2 1 2');
+const fuma = GUION.grupos[0].preguntas.find(q => q.id === 'fuma');
+ok('con la edad ya respondida, tabaco no vuelve a preguntarla', window.guionOpciones(fuma, {edad: '1'}).length === 1 && window.guionOpciones(fuma, {edad: '4'}).length === 2 && window.guionOpciones(fuma, {}).length === 3);
+ok('35 a 39 años cuenta como 35 o más', window.guionEdad({edad: '3'}) === '>=35' && window.guionEdad({edad: '2'}) === '<35');
 console.log(fallos ? fallos + ' prueba(s) fallaron' : 'Todas las pruebas de la rueda pasaron');
 process.exit(fallos ? 1 : 0);

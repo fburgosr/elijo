@@ -1,5 +1,5 @@
 // Permite abrir la app sin conexión después de la primera visita.
-const CACHE = 'elijo-v3';
+const CACHE = 'elijo-v4';
 const BASE = ['/', '/app.js', '/rueda.js', '/guion.js', '/estilos.css', '/icono.svg', '/manifest.webmanifest', '/contenido.inicial.json'];
 
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE)).then(() => self.skipWaiting())));

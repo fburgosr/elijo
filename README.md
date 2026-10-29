@@ -31,7 +31,9 @@ Las reglas clínicas de elegibilidad (qué método se recomienda según semanas 
 
 ## Guion de consulta y rueda de elegibilidad
 
-El modo obstetra abre con un guion de consulta (`guion.js`): unas 25 preguntas de cribado agrupadas por tema (posparto y lactancia, datos generales, presión y corazón, cefalea y lupus, sangrado y mama, diabetes e hígado, VIH y medicamentos). Solo cuando la respuesta es "Sí" se abren las opciones de detalle, y cada opción apunta a filas de la tabla de la OMS. El resultado por método se actualiza con cada respuesta. La tabla completa sigue disponible desde el guion.
+El modo obstetra abre con la pestaña Rueda: un anillo de siete sectores (uno por método) que se colorea con la categoría de la OMS a medida que la obstetra responde el guion pregunta a pregunta, con botones grandes No/Sí y barra de progreso. Tocar un sector muestra la categoría y la causa. Las animaciones se desactivan si el teléfono tiene activada la opción de reducir movimiento. Las respuestas son las mismas del guion en lista, así que se puede cambiar de una vista a otra sin perder nada.
+
+La pestaña Guion muestra el mismo guion de consulta como lista (`guion.js`): unas 25 preguntas de cribado agrupadas por tema (posparto y lactancia, datos generales, presión y corazón, cefalea y lupus, sangrado y mama, diabetes e hígado, VIH y medicamentos). Solo cuando la respuesta es "Sí" se abren las opciones de detalle, y cada opción apunta a filas de la tabla de la OMS. El resultado por método se actualiza con cada respuesta. La tabla completa sigue disponible desde el guion.
 
 La rueda de elegibilidad contiene las 131 condiciones de la tabla resumen de la guía de la OMS (6.ª edición, 2025, sección 5.12). La tabla está transcrita en `rueda.js`. Las cinco filas de edad se derivaron de los umbrales que da la guía para cada método. Antes de cambiar una celda hay que cotejarla con la guía.
 

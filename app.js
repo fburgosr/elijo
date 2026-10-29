@@ -109,7 +109,7 @@ function opciones(a, hoy, lista){
 const hoy = new Date(); hoy.setHours(0,0,0,0);
 const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 const EJEMPLO = {general:false, embarazada:false, nacimiento: iso(new Date(hoy.getTime() - 21*DIA)), parto:'normal', alimento:'pecho', regla:'no', deseo:'anios', importa:['nodiario'], condiciones:[], ejemplo:true};
-let S = {guion:{momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:false}, rueda:{momento:'I', sel:new Set(), abierto:0}, dato:0, codigo:'', registradas:0, reg:{fase:'app', metodo:null}, vista:'inicio', paso:0, a:{...EJEMPLO}, metodo:null, comparar:[], favoritos:[], dudas:[], mito:0, mitoVisto:false, obst:'guion', lista:[]};
+let S = {asis:{i:0, sel:null, prev:null, anim:false, toc:{}}, guion:{momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:false}, rueda:{momento:'I', sel:new Set(), abierto:0}, dato:0, codigo:'', registradas:0, reg:{fase:'app', metodo:null}, vista:'inicio', paso:0, a:{...EJEMPLO}, metodo:null, comparar:[], favoritos:[], dudas:[], mito:0, mitoVisto:false, obst:'asistente', lista:[]};
 try { const g = JSON.parse(localStorage.getItem('elijo') || 'null'); if (g && g.a) { S.a = g.a; S.favoritos = g.favoritos || []; } } catch(e){}
 try { S.codigo = localStorage.getItem('elijo-codigo') || ''; S.centro = localStorage.getItem('elijo-centro') || ''; } catch(e){}
 const guardar = () => { try { localStorage.setItem('elijo', JSON.stringify({a:S.a, favoritos:S.favoritos})); } catch(e){} };
@@ -447,10 +447,73 @@ function vRueda(){
     grupos +
     '<p class="small muted">Fuente: ' + MEC.fuente + ' Cuando hay varias condiciones, la guía pide valorarlas en conjunto: la categoría mostrada es un mínimo, no reemplaza el juicio clínico. No incluye métodos de barrera, esterilización ni anticoncepción de emergencia.</p>';
 }
+/* ----- Modo Rueda: anillo animado + guion pregunta a pregunta (mismas respuestas que el guion) ----- */
+const TIEMPOS_ASIS = [['pre','Aún embarazada'],['48h','Menos de 48 horas'],['3sem','48 horas a 3 semanas'],['6sem','3 a 6 semanas'],['6m','6 semanas a 6 meses'],['mas','Más de 6 meses'],['no','No está en posparto']];
+const ABREV = ['AOC', 'INY', 'PPS', 'DMPA', 'IMP', 'Cu', 'LNG'];
+function pasosAsistente(){
+  const G = S.guion, p = G.pos, pasos = [{tipo:'tiempo'}];
+  const esPos = p.tiempo && p.tiempo !== 'no' && p.tiempo !== 'pre';
+  if (esPos){
+    pasos.push({tipo:'lacta'});
+    if (!p.lacta && (p.tiempo === '48h' || p.tiempo === '3sem' || p.tiempo === '6sem')) pasos.push({tipo:'tev'});
+    pasos.push({tipo:'sepsis'});
+  }
+  if (p.tiempo) for (const g of GUION.grupos) for (const q of g.preguntas) if (!q.soloGeneral || p.tiempo === 'no') pasos.push({tipo:'q', q, g});
+  return pasos;
+}
+function anillo(res){
+  const A = S.asis, n = res.length, seg = 100 / n, hueco = 1.2;
+  const clase = r => r.rango >= 4 ? 'r4' : r.rango === 3 ? 'r3' : r.rango >= 1 ? 'r1' : 'r0';
+  const cambios = A.prev ? res.map((r, i) => r.rango !== A.prev[i]) : res.map(() => false);
+  A.prev = res.map(r => r.rango);
+  const libres = res.filter(r => r.rango >= 1 && r.rango <= 2).length, conocidos = res.filter(r => r.rango >= 1).length;
+  const sectores = res.map((r, i) => '<circle class="sector ' + clase(r) + (A.sel === i ? ' sel' : '') + (cambios[i] ? ' pulso' : '') + '" cx="100" cy="100" r="74" pathLength="100" stroke-dasharray="' + (seg - hueco) + ' ' + (100 - seg + hueco) + '" stroke-dashoffset="' + (25 - i * seg) + '" data-sector="' + i + '"/>').join('');
+  const etiquetas = res.map((r, i) => { const ang = ((i + 0.5) * seg / 100) * 2 * Math.PI - Math.PI / 2, x = 100 + 74 * Math.cos(ang), y = 100 + 74 * Math.sin(ang);
+    return '<text class="etq" x="' + x.toFixed(1) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="middle" data-sector="' + i + '">' + ABREV[i] + '</text>'; }).join('');
+  const centro = conocidos ? '<text class="num" x="100" y="96" text-anchor="middle">' + libres + '</text><text class="sub" x="100" y="114" text-anchor="middle">de ' + n + ' sin restricción</text>' : '<text class="sub" x="100" y="96" text-anchor="middle">Responda el guion</text><text class="sub" x="100" y="110" text-anchor="middle">y la rueda se colorea</text>';
+  return '<svg class="rueda" viewBox="0 0 200 200" role="img" aria-label="Rueda de elegibilidad: ' + libres + ' de ' + n + ' métodos sin restricción">' + sectores + etiquetas + centro + '</svg>';
+}
+function vAsistente(){
+  const A = S.asis, G = S.guion, filas = guionFilas(G.resp, G.pos), res = mecEvaluar(filas, G.momento);
+  const txt = ['Sin categoría todavía', 'Se puede usar', 'En general se puede usar', 'No se recomienda, salvo que no haya otro método', 'No usar'];
+  const detalle = A.sel !== null && res[A.sel] ? '<div class="mec c' + res[A.sel].rango + '"><span class="mec-n">' + (res[A.sel].rango ? res[A.sel].texto + (res[A.sel].aclarar ? '*' : '') : '–') + '</span><span class="mec-t"><b>' + MEC.columnas[A.sel].t + '</b><br>' + txt[res[A.sel].rango] + (res[A.sel].rango >= 2 ? '<br><span class="small">Por: ' + res[A.sel].causas.join('; ') + '</span>' : '') + '</span></div>' : '<p class="small muted" style="text-align:center">Verde: categoría 1 o 2 · Ámbar: 3 · Rojo: 4. Toque un sector para ver el detalle.</p>';
+  const leyenda = '<div class="leyenda">' + res.map((r, i) => '<button class="ley ' + (A.sel === i ? 'sel' : '') + '" data-sector="' + i + '"><i class="punto ' + (r.rango >= 4 ? 'r4' : r.rango === 3 ? 'r3' : r.rango >= 1 ? 'r1' : 'r0') + '"></i>' + ABREV[i] + ' <span class="muted">' + MEC.columnas[i].t.split(' (')[0] + '</span></button>').join('') + '</div>';
+  const pasos = pasosAsistente(); if (A.i > pasos.length) A.i = pasos.length;
+  const chipA = (val, actual, t, attr) => '<button class="btn seg chip ' + (actual === val ? '' : 'quiet') + '" data-asis="' + attr + '">' + t + '</button>';
+  const grande = (attr, t, on) => '<button class="btn grande ' + (on ? '' : 'quiet') + '" data-asis="' + attr + '">' + t + '</button>';
+  let tarjeta;
+  if (A.i >= pasos.length){
+    const sies = []; for (const g of GUION.grupos) for (const q of g.preguntas){ const r = G.resp[q.id]; if (r === undefined || r === 'no' || r === 'si') continue; sies.push(q.opciones ? q.q + ' → ' + (q.opciones[Number(r)] || {}).t : q.q); }
+    for (const g of GUION.grupos) for (const q of g.preguntas) if (!q.opciones && G.resp[q.id] === 'si') sies.push(q.q);
+    tarjeta = '<div class="paso"><p class="muted small">Guion completo</p><h3>Listo. La rueda refleja las respuestas.</h3>' + (sies.length ? '<p class="small">Respuestas con "Sí":</p><ul class="plain small">' + sies.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="small muted">No se marcó ninguna condición.</p>') +
+      '<div class="row"><button class="btn quiet" data-asis="ir:0">Revisar desde el inicio</button><button class="btn" data-act="asisnueva">Nueva paciente</button></div></div>';
+  } else {
+    const p = pasos[A.i], pos = G.pos; let cuerpo = '', titulo = '', grupo = '';
+    if (p.tipo === 'tiempo'){ grupo = 'Situación posparto'; titulo = '¿Cuánto tiempo ha pasado desde el parto?'; cuerpo = '<div class="row">' + TIEMPOS_ASIS.map(([v, t]) => chipA(v, pos.tiempo, t, 'tiempo:' + v)).join('') + '</div>'; }
+    else if (p.tipo === 'lacta'){ grupo = 'Situación posparto'; titulo = '¿Está dando de lactar?'; cuerpo = '<div class="row dos">' + grande('pos:lacta:no', 'No', pos.lacta === false && A.toc.lacta) + grande('pos:lacta:si', 'Sí', pos.lacta) + '</div>'; }
+    else if (p.tipo === 'tev'){ grupo = 'Situación posparto'; titulo = 'Sin lactancia: ¿tiene otros factores de riesgo de trombosis?'; cuerpo = '<p class="small muted">Cesárea, transfusión, hemorragia, preeclampsia, obesidad, tabaco o inmovilidad.</p><div class="row dos">' + grande('pos:tev:no', 'No', !pos.tev && A.toc.tev) + grande('pos:tev:si', 'Sí', pos.tev) + '</div>'; }
+    else if (p.tipo === 'sepsis'){ grupo = 'Situación posparto'; titulo = '¿Sepsis puerperal?'; cuerpo = '<div class="row dos">' + grande('pos:sepsis:no', 'No', !pos.sepsis && A.toc.sepsis) + grande('pos:sepsis:si', 'Sí', pos.sepsis) + '</div>'; }
+    else {
+      const q = p.q, r = G.resp[q.id]; grupo = p.g.g; titulo = q.q;
+      if (q.tipo === 'una') cuerpo = '<div class="row">' + q.opciones.map((o, i) => chipA(String(i), r === undefined ? '' : String(r), o.t, 'op:' + q.id + ':' + i)).join('') + '</div>';
+      else {
+        cuerpo = (q.nota ? '<p class="small muted">' + q.nota + '</p>' : '') + '<div class="row dos">' + grande('sn:' + q.id + ':no', 'No', r === 'no') + grande('sn:' + q.id + ':si', 'Sí', r !== undefined && r !== 'no') + '</div>';
+        if (q.opciones && r !== undefined && r !== 'no') cuerpo += '<p class="small muted">¿Cuál de estas?</p><div class="stack">' + q.opciones.map((o, i) => '<button class="opt chica" data-asis="op:' + q.id + ':' + i + '" aria-pressed="' + (String(r) === String(i)) + '"><span class="tick">' + (String(r) === String(i) ? '✓' : '') + '</span>' + o.t + '</button>').join('') + '</div>';
+      }
+    }
+    tarjeta = '<div class="paso' + (A.anim ? ' entra' : '') + '"><div class="progreso"><i style="width:' + Math.round(A.i / pasos.length * 100) + '%"></i></div><p class="muted small">' + grupo + ' · ' + (A.i + 1) + ' de ' + pasos.length + '</p><h3>' + titulo + '</h3>' + cuerpo +
+      '<div class="row" style="justify-content:space-between"><button class="btn quiet" data-act="asisatras"' + (A.i === 0 ? ' disabled' : '') + '>Atrás</button><button class="btn quiet" data-act="asissig">' + (p.tipo === 'q' && (G.resp[p.q.id] === undefined) ? 'Omitir' : 'Siguiente') + '</button></div></div>';
+  }
+  A.anim = false;
+  return '<div class="panel stack"><div class="row" style="justify-content:space-between"><h3>Rueda de elegibilidad</h3><span class="row" style="gap:4px">' + [['I','Inicia'],['C','Continúa']].map(([k, t]) => '<button class="btn seg chip ' + (G.momento === k ? '' : 'quiet') + '" data-gmomento="' + k + '">' + t + '</button>').join('') + '</span></div>' +
+    anillo(res) + leyenda + detalle + '</div>' + tarjeta +
+    '<p class="small muted"><button class="link" data-obst="guion" style="padding:0">Ver todas las preguntas en una lista</button> · <button class="link" data-obst="rueda" style="padding:0">Tabla completa de la OMS</button></p>' +
+    '<p class="small muted">Fuente: ' + MEC.fuente + ' La categoría mostrada es un mínimo y no reemplaza el juicio clínico.</p>';
+}
 function vObstetra(){
   if (!S.guion.prellenado){ const p = posDesdePaciente(); if (p) S.guion.pos = p; S.guion.prellenado = true; }
   const d = dias(S.a, hoy), col = S.a.general ? 0 : S.a.embarazada ? 1 : d < 42 ? 1 : d < 183 ? 2 : 3;
-  const seg = ['guion','tabla','laminas','lista','registro'].map((k, i) => '<button class="btn seg ' + (S.obst === k ? '' : 'quiet') + '" data-obst="' + k + '">' + ['Guion','Posparto','Láminas','Consejería','Registro'][i] + '</button>').join('');
+  const seg = ['asistente','guion','tabla','laminas','lista','registro'].map((k, i) => '<button class="btn seg ' + (S.obst === k ? '' : 'quiet') + '" data-obst="' + k + '">' + ['Rueda','Guion','Posparto','Láminas','Consejería','Registro'][i] + '</button>').join('');
   let c = '';
   if (S.obst === 'tabla') c = '<div class="panel stack"><h3>Elegibilidad en mujeres que lactan</h3><div class="tablewrap"><table><thead><tr><th>Método</th><th>0 a 6 sem</th><th>6 sem a 6 m</th><th>Más de 6 m</th></tr></thead><tbody>' +
     TABLA.map(r => '<tr><td>' + r[0] + '</td>' + [1,2,3].map(i => '<td class="c c' + r[i][0] + (i === col ? ' now' : '') + '">' + r[i] + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' +
@@ -459,6 +522,7 @@ function vObstetra(){
   if (S.obst === 'registro') c = vRegistro();
   if (S.obst === 'rueda') c = vRueda();
   if (S.obst === 'guion') c = vGuion();
+  if (S.obst === 'asistente') c = vAsistente();
   if (S.obst === 'lista') c = '<div class="panel"><h3>Pasos de la consejería</h3>' + LISTA.map((t, i) => '<label class="check" for="chk' + i + '"><input type="checkbox" id="chk' + i + '" data-chk="' + i + '"' + (S.lista.includes(i) ? ' checked' : '') + '><span>' + t + '</span></label>').join('') + '<p class="small muted" style="padding-top:10px">' + S.lista.length + ' de ' + LISTA.length + ' pasos. No se guarda ningún dato de la paciente.</p></div>';
   return cabecera('<button class="link" data-go="resumen">Resumen de la paciente</button>') + '<div class="stack"><h2>Modo obstetra</h2><p class="muted">Apoyo visual para la consulta.</p></div><div class="row">' + seg + '</div>' + c + '<a class="btn quiet wide" href="/admin">Administración del contenido</a>';
 }
@@ -487,6 +551,17 @@ document.addEventListener('click', ev => {
   if (d.duda || d.dudatxt){ const t = d.dudatxt || crudo(MITOS[+d.duda].q); if (!S.dudas.includes(t)) S.dudas.push(t); return toast('Guardada en tu resumen'); }
   if (d.temor){ S.temor = S.temor === +d.temor ? null : +d.temor; return render(); }
   if (d.motivo !== undefined) return elegirMotivo(d.motivo);
+  if (d.sector !== undefined){ S.asis.sel = S.asis.sel === +d.sector ? null : +d.sector; return render(); }
+  if (d.asis){
+    const A = S.asis, G = S.guion, partes = d.asis.split(':'), k = partes[0];
+    const avanzar = () => { A.i++; A.anim = true; };
+    if (k === 'tiempo'){ G.pos.tiempo = partes[1]; avanzar(); }
+    else if (k === 'pos'){ G.pos[partes[1]] = partes[2] === 'si'; A.toc[partes[1]] = true; avanzar(); }
+    else if (k === 'sn'){ G.resp[partes[1]] = partes[2]; const q = GUION.grupos.flatMap(g => g.preguntas).find(x => x.id === partes[1]); if (partes[2] === 'no' || !q.opciones) avanzar(); }
+    else if (k === 'op'){ G.resp[partes[1]] = partes[2]; avanzar(); }
+    else if (k === 'ir'){ A.i = +partes[1]; A.anim = true; }
+    return render();
+  }
   if (d.gtiempo){ S.guion.pos.tiempo = d.gtiempo; return render(); }
   if (d.gpos){ const [k, v] = d.gpos.split(':'); S.guion.pos[k] = v === 'si'; return render(); }
   if (d.gsn){ const [q, v] = d.gsn.split(':'); S.guion.resp[q] = v; return render(); }
@@ -504,6 +579,9 @@ document.addEventListener('click', ev => {
     case 'plan': S.paso = 0; a.general = false; a.embarazada = true; S.plan = true; return ir('preguntas');
     case 'registrar': return registrarConsejeria();
     case 'reintentar': vaciarCola().then(() => { toast(leerCola().length ? 'Siguen pendientes; revisa la conexión' : 'Todo enviado'); render(); }); return;
+    case 'asisatras': if (S.asis.i > 0){ S.asis.i--; S.asis.anim = true; } return render();
+    case 'asissig': S.asis.i++; S.asis.anim = true; return render();
+    case 'asisnueva': S.guion = {momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:true}; S.asis = {i:0, sel:null, prev:null, anim:true, toc:{}}; return render();
     case 'glimpiar': S.guion = {momento:'I', resp:{}, pos:{tiempo:'', lacta:false, tev:false, sepsis:false}, grupo:0, prellenado:true}; return render();
     case 'gprellenar': { const p = posDesdePaciente(); if (!p) return toast('La paciente aún no ha respondido el cuestionario'); S.guion.pos = p; toast('Situación posparto tomada de sus respuestas'); return render(); }
     case 'rprellenar': { const p = prellenarRueda(); if (!p.size) return toast('La paciente aún no ha respondido el cuestionario de posparto'); p.forEach(x => S.rueda.sel.add(x)); return render(); }

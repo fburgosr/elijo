@@ -183,7 +183,7 @@ const cabecera = (t) => '<div class="top"><button class="link" data-go="inicio" 
 const aviso = '<p class="proto">Esta app no reemplaza la consulta con tu obstetra.</p>';
 
 function vInicio(){
-  return cabecera() + '<section class="hero"><h1>Tú decides qué método usar después del parto</h1><p>Responde 7 preguntas cortas y mira qué opciones son seguras para ti hoy.</p></section>' +
+  return cabecera() + '<section class="hero"><h1>Tú decides qué método usar después del parto</h1><p>Responde unas preguntas cortas y mira qué opciones son seguras para ti hoy.</p></section>' +
   '<div class="stack"><button class="btn wide" data-act="empezar">Empezar</button>' +
   '<button class="btn ghost wide" data-act="plan">Estoy embarazada: armar mi plan</button>' +
   '<button class="btn ghost wide" data-act="general">No estoy en posparto</button>' +

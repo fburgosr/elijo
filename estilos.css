@@ -33,7 +33,8 @@ p{margin:0}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .row > *{min-width:0}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--accent)}
+.brand{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--accent)}
+.logo{width:26px;height:26px;flex:none}
 .proto{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:8px 12px;font-size:.82rem}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}

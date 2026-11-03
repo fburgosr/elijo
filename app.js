@@ -179,7 +179,9 @@ const TAB = {
 };
 
 /* ===== Vistas ===== */
-const cabecera = (t) => '<div class="top"><button class="link" data-go="inicio" style="text-decoration:none"><span class="brand">Elijo</span></button>' + (t || '') + '</div>';
+// Logo: círculo, corazón y visto (icono.svg y logo.svg llevan el mismo dibujo).
+const LOGO = '<svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="currentColor"/><path d="M50 82C36 71 18 59 18 43a17 17 0 0 1 32-7 17 17 0 0 1 32 7c0 16-18 28-32 39z" style="fill:var(--bg)"/><path d="M36 51l9 9 18-18" fill="none" stroke="currentColor" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const cabecera = (t) => '<div class="top"><button class="link" data-go="inicio" style="text-decoration:none"><span class="brand">' + LOGO + 'Elijo</span></button>' + (t || '') + '</div>';
 const aviso = '<p class="proto">Esta app no reemplaza la consulta con tu obstetra.</p>';
 
 function vInicio(){

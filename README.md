@@ -29,6 +29,8 @@ En Ayuda la usuaria elige el tema: como el teléfono, claro u oscuro (`tema.js`,
 
 Cada publicación nueva llega sola a los teléfonos: si la app estaba abierta, muestra el aviso "Hay una versión nueva" con un botón para actualizar.
 
+El logo (círculo, corazón y visto) está en `logo.svg` y `logo-oscuro.svg` para documentos; `icono.svg` es el ícono de la app y la cabecera lo lleva en línea.
+
 ## Qué no se configura desde el panel
 
 Las reglas clínicas de elegibilidad (qué método se recomienda según semanas postparto, lactancia y condiciones de salud) están en `app.js`, en la función `estado`. Cambiarlas requiere revisión clínica y un cambio de código, no un clic.

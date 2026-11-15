@@ -23,7 +23,9 @@ php -S localhost:3000 router.php
 - Clave de la administradora.
 - Centros de salud, cada uno con su código para el registro de consejerías, y los conteos por mes y por centro: pacientes que salen con método (línea de base y con la app) y motivos de quienes no quieren un método.
 
-El método de lactancia y amenorrea viene desactivado. Se activa en Métodos.
+El método de lactancia y amenorrea y la vasectomía vienen desactivados. Se activan en Métodos.
+
+Cuando una corrección debe llegar también al contenido que la administradora ya publicó, se escribe como un ajuste en `lib.php` (`ajustar`): se aplica una sola vez, deja copia en `historial/` y se puede revertir desde el panel.
 
 En Ayuda la usuaria elige el tema: como el teléfono, claro u oscuro (`tema.js`, guardado en el propio teléfono).
 

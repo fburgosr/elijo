@@ -124,7 +124,8 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 const crudo = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
 const videosDe = id => CFG.videos.filter(v => v.m === id);
 const linkVideo = v => '<a class="btn quiet wide video" href="' + esc(v.url) + '" target="_blank" rel="noopener">Ver video: ' + esc(v.t) + '</a>';
-const DATOS = C.datos || [], HISTORIAS = C.historias || [], PAREJA = C.pareja || [];
+// Si la vasectomía está desactivada, tampoco se muestra el consejo para la pareja que la ofrece.
+const DATOS = C.datos || [], HISTORIAS = C.historias || [], PAREJA = (C.pareja || []).filter(x => CFG.metodos.vasectomia.activo || !/vasectom/i.test(x));
 /* Envíos anónimos con cola: si no hay señal se guardan en el teléfono y salen al volver la conexión. */
 function leerCola(){ try { return JSON.parse(localStorage.getItem('elijo-cola') || '[]'); } catch(e){ return []; } }
 function guardarCola(c){ try { localStorage.setItem('elijo-cola', JSON.stringify(c.slice(-200))); } catch(e){} }
@@ -187,7 +188,7 @@ const aviso = '<p class="proto">Esta app no reemplaza la consulta con tu obstetr
 function vInicio(){
   return cabecera() + '<section class="hero"><h1>Tú decides qué método usar después del parto</h1><p>Responde unas preguntas cortas y mira qué opciones son seguras para ti hoy.</p></section>' +
   '<div class="stack"><button class="btn wide" data-act="empezar">Empezar</button>' +
-  '<button class="btn ghost wide" data-act="plan">Estoy embarazada: armar mi plan</button>' +
+  '<button class="btn ghost wide" data-act="plan">Estoy embarazada: armar mi plan para después del parto</button>' +
   '<button class="btn ghost wide" data-act="general">No estoy en posparto</button>' +
   '<button class="btn quiet wide" data-go="opciones">Ver un ejemplo</button>' +
   '<button class="btn quiet wide" data-go="obstetra">Soy obstetra</button></div>' +
@@ -199,7 +200,7 @@ function vInicio(){
 const PREG = [
   {k:'nacimiento', t:'¿Cuándo nació tu bebé?', tipo:'fecha', solo:a => !a.general && !S.plan},
   {k:'parto', t:'¿Cómo fue el parto?', o:[['normal','Parto normal'],['cesarea','Cesárea']], solo:a => !a.general && !a.embarazada},
-  {k:'alimento', t:'¿Cómo alimentas a tu bebé?', alt:'¿Cómo piensas alimentar a tu bebé?', o:[['pecho','Solo pecho'],['mixta','Pecho y fórmula'],['formula','Solo fórmula']], solo:a => !a.general},
+  {k:'alimento', t:'¿Cómo alimentas a tu bebé?', alt:'¿Cómo piensas alimentar a tu bebé?', o:[['pecho','Solo pecho'],['mixta','Pecho y fórmula (lactancia mixta)'],['formula','Solo fórmula']], solo:a => !a.general},
   {k:'regla', t:'¿Ya volvió tu regla?', o:[['no','Todavía no'],['si','Sí']], solo:a => !a.general && !a.embarazada && melaOn()},
   {k:'deseo', t:'¿Quieres otro embarazo?', o:[['pronto','Sí, pronto'],['anios','Sí, en unos años'],['nomas','No quiero más'],['nose','No lo sé todavía']]},
   {k:'importa', t:'¿Qué te importa más en un método?', multi:IMPORTA.map(i => [i.id, i.t]), sub:'Puedes marcar varias.'},
@@ -238,7 +239,7 @@ function tarjeta(x, cls){
 function contexto(){
   const a = S.a, d = dias(a, hoy);
   if (a.general) return 'Consulta general, no posparto';
-  const t = a.embarazada ? 'Aún embarazada' : d < 14 ? d + ' días después del parto' : Math.floor(d/7) + ' semanas después del parto';
+  const t = a.embarazada ? 'Aún embarazada' : d < 14 ? (d === 1 ? '1 día' : d + ' días') + ' después del parto' : Math.floor(d/7) + ' semanas después del parto';
   const al = {pecho:'solo pecho', mixta:'pecho y fórmula', formula:'solo fórmula'}[a.alimento];
   return t + ' · ' + al;
 }
@@ -247,7 +248,7 @@ function vOpciones(){
   const grupo = (lista, cls, pill, titulo) => lista.length ? '<section class="stack"><p class="group-h"><span class="pill ' + pill + '">' + lista.length + '</span>' + titulo + '</p>' + lista.map(x => tarjeta(x, cls)).join('') + '</section>' : '';
   return cabecera('<button class="link" data-act="empezar">Cambiar respuestas</button>') +
     (S.a.ejemplo ? '<p class="proto">Estás viendo un ejemplo: bebé de 3 semanas, solo pecho. Responde las preguntas para ver tus opciones.</p>' : '') +
-    '<div class="stack"><h2>' + (S.a.embarazada && !S.a.general ? 'Tu plan para el parto' : 'Tus opciones') + '</h2><p class="muted">' + contexto() + '</p>' + (S.a.embarazada && !S.a.general ? '<p>Elige ahora, con calma. Algunos métodos se colocan al momento del parto y hay que pedirlos antes.</p>' : '') + '</div>' +
+    '<div class="stack"><h2>' + (S.a.embarazada && !S.a.general ? 'Tu plan para después del parto' : 'Tus opciones') + '</h2><p class="muted">' + contexto() + '</p>' + (S.a.embarazada && !S.a.general ? '<p>Elige ahora, con calma. Algunos métodos se colocan al momento del parto y hay que pedirlos antes.</p>' : '') + '</div>' +
     (S.comparar.length >= 2 ? '<button class="btn wide" data-go="comparar">Comparar ' + S.comparar.length + ' métodos</button>' : '') +
     (DATOS.length ? '<div class="panel stack sabias"><p class="muted small">¿Sabías que?</p><p>' + DATOS[S.dato % DATOS.length].t + '</p><button class="link" data-act="otrodato">Ver otro dato</button></div>' : '') +
     '<button class="btn quiet wide" data-go="mitos">¿Tienes dudas o temores? Míralos aquí</button>' +
@@ -312,7 +313,7 @@ function vResumen(){
   const a = S.a, o = opciones(a, hoy, activos()), plan = a.embarazada && !a.general;
   const hitos = (a.embarazada || a.general) ? '' : '<div class="panel stack"><h3>Fechas para recordar</h3><ul class="plain">' +
     [[28,'Desde aquí se puede colocar la T o el DIU'],[42,'Control de las 6 semanas'],[183,'Tu bebé cumple 6 meses' + (melaOn() ? ': la lactancia ya no protege' : '')]].map(([d, t]) => '<li><b>' + fecha(fechaDesde(a, d)) + '.</b> ' + t + '</li>').join('') + '</ul><button class="btn quiet wide" data-act="calendario">Añadir estas fechas a mi calendario</button></div>';
-  return cabecera() + '<div class="stack"><h2>' + (plan ? 'Mi plan para el parto' : 'Mi resumen') + '</h2><p class="muted">' + (plan ? 'Muéstralo en tu control prenatal y cuando llegues a dar a luz.' : 'Muéstralo en tu consulta.') + '</p></div>' +
+  return cabecera() + '<div class="stack"><h2>' + (plan ? 'Mi plan para después del parto' : 'Mi resumen') + '</h2><p class="muted">' + (plan ? 'Muéstralo en tu control prenatal y cuando llegues a dar a luz.' : 'Muéstralo en tu consulta.') + '</p></div>' +
     (a.ejemplo ? '<p class="proto">Este resumen usa respuestas de ejemplo.</p>' : '') +
     '<div class="panel stack"><h3>Sobre mí</h3><p>' + contexto() + '</p><p class="small muted">' + textoResumen().split('\n').slice(2, 6).join('<br>') + '</p></div>' +
     '<div class="panel stack"><h3>' + (plan ? 'Quiero este método después del parto' : 'Me interesan') + '</h3>' + (S.favoritos.length ? S.favoritos.map(id => { const m = METODOS.find(x => x.id === id); return '<button class="link" data-metodo="' + id + '" data-volver="resumen">' + m.nombre + '</button>'; }).join('') : '<p class="muted">Aún no eliges. Abre un método y toca “Me interesa”.</p>') +
@@ -523,7 +524,9 @@ function vObstetra(){
   let c = '';
   if (S.obst === 'tabla') c = '<div class="panel stack"><h3>Elegibilidad en mujeres que lactan</h3><div class="tablewrap"><table><thead><tr><th>Método</th><th>0 a 6 sem</th><th>6 sem a 6 m</th><th>Más de 6 m</th></tr></thead><tbody>' +
     TABLA.map(r => '<tr><td>' + r[0] + '</td>' + [1,2,3].map(i => '<td class="c c' + r[i][0] + (i === col ? ' now' : '') + '">' + r[i] + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>' +
-    '<p class="small muted">Categorías OMS: 1 y 2 se puede usar; 3 los riesgos suelen superar los beneficios; 4 no usar. La columna resaltada corresponde a la paciente actual (' + contexto() + ').</p><p class="small muted">Borrador según la 6.ª edición de los criterios de la OMS (2025). Cotejar con la guía completa antes de usar en consulta.</p></div>';
+    '<p class="small muted">Categorías OMS: 1 y 2 se puede usar; 3 los riesgos suelen superar los beneficios; 4 no usar. La columna resaltada corresponde a la paciente actual (' + contexto() + ').</p><p class="small muted">Borrador según la 6.ª edición de los criterios de la OMS (2025). Cotejar con la guía completa antes de usar en consulta.</p></div>' +
+    '<div class="panel stack"><h3>T de cobre después del parto</h3><p class="small">Sí se puede colocar. La OMS la clasifica en <b>categoría 1</b> en las primeras 48 horas, incluida la colocación inmediata tras la salida de la placenta y durante la cesárea, con o sin lactancia. De 48 horas a menos de 4 semanas es categoría 3 (esperar); desde las 4 semanas vuelve a categoría 1; con sepsis puerperal es categoría 4 (OMS, 2025, p. 86).</p>' +
+    '<p class="small">La colocación posparto no aumenta la perforación ni la infección. La expulsión sí es más frecuente que en la colocación de intervalo: cerca de 9 % si se coloca en los 10 minutos tras la placenta y 25 % si se coloca más tarde dentro del posparto temprano, frente a 2 % en la de intervalo (CDC, 2024). Conviene revisar el dispositivo en el control. La inserción posparto requiere personal capacitado (OMS y Johns Hopkins, 2022).</p></div>';
   if (S.obst === 'laminas') c = '<div class="stack">' + activos().map(m => '<button class="card" data-metodo="' + m.id + '" data-volver="obstetra">' + ico(m.id) + '<span class="body"><h3>' + m.nombre + '</h3><span class="muted small">' + m.apodo + '</span></span></button>').join('') + '</div>';
   if (S.obst === 'registro') c = vRegistro();
   if (S.obst === 'rueda') c = vRueda();

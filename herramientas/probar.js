@@ -75,6 +75,22 @@ const ok = (nombre, cond) => { console.log((cond ? 'ok   ' : 'FALLA ') + nombre)
     ok('las reglas clínicas no se pueden alterar', c2.metodos[0].hormonal === true);
     ok('restaurar contenido inicial', (await pedir(base + '/api/admin/restaurar', { method: 'POST', headers: A })).status === 200 && (await (await pedir(base + '/api/contenido')).json()).version === c.version);
     ok('la semilla trae datos y consejos para la pareja', c.datos.length >= 3 && c.pareja.length >= 3 && Array.isArray(c.historias));
+    // Ajustes de versión: lo publicado antes de noviembre de 2026 recibe la corrección una sola vez.
+    ok('vasectomía desactivada en la semilla', c.metodos.find(m => m.id === 'vasectomia').activo === false);
+    const viejo = JSON.parse(JSON.stringify(c)); delete viejo.ajustes; viejo.version = '1.1'; viejo.fecha = '2026-10-03';
+    const de = (x, id) => x.metodos.find(m => m.id === id);
+    de(viejo, 'vasectomia').activo = true; de(viejo, 'mela').activo = true;
+    de(viejo, 'diu_cu').uso = 'Lo coloca personal de salud. Puede ponerse en las primeras 48 horas después del parto o desde las 4 semanas.';
+    de(viejo, 'diu_cu').efectos = 'Texto propio de la administradora';
+    fs.writeFileSync(path.join(datos, 'contenido.json'), JSON.stringify(viejo));
+    const copias = fs.readdirSync(path.join(datos, 'historial')).length;
+    const c3 = await (await pedir(base + '/api/contenido')).json();
+    ok('lo ya publicado recibe el ajuste: vasectomía apagada y MELA sin tocar', de(c3, 'vasectomia').activo === false && de(c3, 'mela').activo === true && c3.version === c.version);
+    ok('el ajuste actualiza los textos originales y respeta los editados', de(c3, 'diu_cu').uso === de(c, 'diu_cu').uso && de(c3, 'diu_cu').efectos === 'Texto propio de la administradora');
+    ok('el ajuste deja copia en el historial', fs.readdirSync(path.join(datos, 'historial')).length === copias + 1);
+    de(c3, 'vasectomia').activo = true;
+    ok('la administradora puede reactivar la vasectomía y el ajuste no se repite', (await pedir(base + '/api/admin/contenido', { method: 'PUT', headers: A, body: JSON.stringify(c3) })).status === 200 && de(await (await pedir(base + '/api/contenido')).json(), 'vasectomia').activo === true);
+    await pedir(base + '/api/admin/restaurar', { method: 'POST', headers: A });
     const conHistoria = JSON.parse(JSON.stringify(c)); conHistoria.historias.push({ nombre: 'Prueba', texto: 'Texto de prueba' });
     ok('se publica una historia', (await pedir(base + '/api/admin/contenido', { method: 'PUT', headers: A, body: JSON.stringify(conHistoria) })).status === 200 && (await (await pedir(base + '/api/contenido')).json()).historias.length === 1);
     const P = { 'Content-Type': 'application/json' };

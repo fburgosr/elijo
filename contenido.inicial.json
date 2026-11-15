@@ -1,6 +1,6 @@
 {
- "version": "1.1",
- "fecha": "2026-10-03",
+ "version": "1.2",
+ "fecha": "2026-11-15",
  "metodos": [
   {
    "id": "implante",
@@ -26,9 +26,9 @@
    "apodo": "DIU sin hormonas, dentro del útero",
    "efic": 0.8,
    "dura": "Hasta 12 años",
-   "uso": "Lo coloca personal de salud. Puede ponerse en las primeras 48 horas después del parto o desde las 4 semanas.",
+   "uso": "Lo coloca personal de salud capacitado. Puede ponerse justo después del parto o de la cesárea, hasta las 48 horas. Si pasan las 48 horas, se espera a las 4 semanas. No se pone si hay infección después del parto.",
    "lact": "No tiene hormonas. No afecta la leche.",
-   "efectos": "Regla más larga y abundante y más cólicos, sobre todo los primeros 3 a 6 meses.",
+   "efectos": "Regla más larga y abundante y más cólicos, sobre todo los primeros 3 a 6 meses. Puesta justo después del parto, se sale sola en cerca de 1 de cada 10 mujeres; por eso se revisa en el control.",
    "msp": true,
    "hormonal": false,
    "tags": [
@@ -176,7 +176,7 @@
     "sinhormonas",
     "anios"
    ],
-   "activo": true
+   "activo": false
   }
  ],
  "mitos": [
@@ -204,7 +204,7 @@
   {
    "q": "La T de cobre se puede poner el mismo día del parto.",
    "v": true,
-   "r": "Se puede colocar en las primeras 48 horas. Si no, se espera hasta las 4 semanas.",
+   "r": "Sí. Según la OMS se puede colocar sin restricción en las primeras 48 horas, también después de una cesárea y dando pecho. Pasadas las 48 horas, se espera hasta las 4 semanas.",
    "f": "OMS, 2025",
    "activo": true
   },

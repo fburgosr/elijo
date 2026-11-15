@@ -47,10 +47,45 @@ function escribirJson(string $archivo, $valor): void {
 
 function semilla(): array { return leerJson(raiz() . '/contenido.inicial.json', []); }
 
+// Lo que la administradora ya publicó no se pisa con la semilla. Cuando una corrección debe llegar también a ese
+// contenido, se escribe aquí: cada ajuste se aplica una sola vez, deja copia en historial/ y se puede revertir en el panel.
+const AJUSTES = 1;
+
+function ajustar(array $c): array {
+    $hecho = (int)($c['ajustes'] ?? 0);
+    $sem = semilla();
+    if ($hecho < 1) {
+        // Noviembre de 2026: vasectomía desactivada (se reactiva en Métodos) y textos de la T de cobre en el posparto.
+        // Los textos solo cambian si siguen siendo los originales; lo que la administradora editó se respeta.
+        $cu = array_column($sem['metodos'], null, 'id')['diu_cu'];
+        $antes = ['uso' => 'Lo coloca personal de salud. Puede ponerse en las primeras 48 horas después del parto o desde las 4 semanas.', 'efectos' => 'Regla más larga y abundante y más cólicos, sobre todo los primeros 3 a 6 meses.'];
+        foreach ($c['metodos'] as &$m) {
+            if ($m['id'] === 'vasectomia') $m['activo'] = false;
+            if ($m['id'] === 'diu_cu') foreach ($antes as $k => $v) if (($m[$k] ?? '') === $v) $m[$k] = $cu[$k];
+        }
+        unset($m);
+        $q = 'La T de cobre se puede poner el mismo día del parto.';
+        $r = array_column($sem['mitos'], 'r', 'q')[$q] ?? null;
+        foreach ($c['mitos'] ?? [] as $i => $x) {
+            if ($r && $x['q'] === $q && $x['r'] === 'Se puede colocar en las primeras 48 horas. Si no, se espera hasta las 4 semanas.') $c['mitos'][$i]['r'] = $r;
+        }
+        if (($c['version'] ?? '') === '1.1' && ($c['fecha'] ?? '') === '2026-10-03') { $c['version'] = $sem['version']; $c['fecha'] = $sem['fecha']; }
+    }
+    $c['ajustes'] = AJUSTES;
+    return $c;
+}
+
 function leerContenido(): array {
-    $guardado = leerJson(dirDatos() . '/contenido.json', null);
+    $f = dirDatos() . '/contenido.json';
+    $guardado = leerJson($f, null);
+    if (!$guardado) return semilla() + ['ajustes' => AJUSTES];
+    if ((int)($guardado['ajustes'] ?? 0) < AJUSTES) {
+        if (is_dir(dirDatos() . '/historial')) @copy($f, dirDatos() . '/historial/contenido-' . time() . '-antes-del-ajuste.json');
+        $guardado = ajustar($guardado);
+        escribirJson($f, $guardado);
+    }
     // Lo publicado antes de una actualización puede no tener las secciones nuevas: se completan con la semilla.
-    return $guardado ? array_merge(semilla(), $guardado) : semilla();
+    return array_merge(semilla(), $guardado);
 }
 
 // ----- Administradora -----
@@ -195,7 +230,7 @@ function normalizar(array $c): array {
             'nombre' => $m['nombre'], 'apodo' => $m['apodo'], 'dura' => $m['dura'], 'uso' => $m['uso'], 'lact' => $m['lact'], 'efectos' => $m['efectos']]);
     }
     return [
-        'version' => trim($c['version']), 'fecha' => $c['fecha'], 'metodos' => $metodos,
+        'version' => trim($c['version']), 'fecha' => $c['fecha'], 'ajustes' => AJUSTES, 'metodos' => $metodos,
         'mitos' => array_map(fn($m) => ['q' => $m['q'], 'v' => $m['v'], 'r' => $m['r'], 'f' => $m['f'], 'activo' => ($m['activo'] ?? true) !== false], $c['mitos']),
         'temores' => array_map(fn($t) => ['q' => $t['q'], 'r' => $t['r'], 'f' => $t['f'], 'activo' => ($t['activo'] ?? true) !== false], $c['temores']),
         'videos' => array_map(fn($v) => ['t' => $v['t'], 'url' => $v['url'], 'm' => $v['m'] ?? ''], $c['videos']),

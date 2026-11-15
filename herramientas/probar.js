@@ -91,6 +91,17 @@ const ok = (nombre, cond) => { console.log((cond ? 'ok   ' : 'FALLA ') + nombre)
     de(c3, 'vasectomia').activo = true;
     ok('la administradora puede reactivar la vasectomía y el ajuste no se repite', (await pedir(base + '/api/admin/contenido', { method: 'PUT', headers: A, body: JSON.stringify(c3) })).status === 200 && de(await (await pedir(base + '/api/contenido')).json(), 'vasectomia').activo === true);
     await pedir(base + '/api/admin/restaurar', { method: 'POST', headers: A });
+    // Segundo ajuste: la bibliografía original se sustituye por la ampliada; una lista editada se respeta.
+    ok('la semilla trae la bibliografía ampliada, entre 35 y 45 referencias con enlace https', c.refs.length >= 35 && c.refs.length <= 45 && c.refs.every(r => r[1].startsWith('https://')));
+    const refsV1 = JSON.parse(fs.readFileSync(path.join(__dirname, 'refs-v1.json'), 'utf8'));
+    const conRefsV1 = JSON.parse(JSON.stringify(c)); conRefsV1.ajustes = 1; conRefsV1.version = '1.2'; conRefsV1.refs = refsV1;
+    fs.writeFileSync(path.join(datos, 'contenido.json'), JSON.stringify(conRefsV1));
+    const c4 = await (await pedir(base + '/api/contenido')).json();
+    ok('lo ya publicado recibe la bibliografía nueva', c4.refs.length === c.refs.length && c4.version === c.version && c4.ajustes === 2);
+    const conRefsPropias = JSON.parse(JSON.stringify(c)); conRefsPropias.ajustes = 1; conRefsPropias.refs = refsV1.slice(0, 3);
+    fs.writeFileSync(path.join(datos, 'contenido.json'), JSON.stringify(conRefsPropias));
+    ok('una bibliografía editada por la administradora no se toca', (await (await pedir(base + '/api/contenido')).json()).refs.length === 3);
+    await pedir(base + '/api/admin/restaurar', { method: 'POST', headers: A });
     const conHistoria = JSON.parse(JSON.stringify(c)); conHistoria.historias.push({ nombre: 'Prueba', texto: 'Texto de prueba' });
     ok('se publica una historia', (await pedir(base + '/api/admin/contenido', { method: 'PUT', headers: A, body: JSON.stringify(conHistoria) })).status === 200 && (await (await pedir(base + '/api/contenido')).json()).historias.length === 1);
     const P = { 'Content-Type': 'application/json' };

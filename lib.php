@@ -49,7 +49,7 @@ function semilla(): array { return leerJson(raiz() . '/contenido.inicial.json', 
 
 // Lo que la administradora ya publicó no se pisa con la semilla. Cuando una corrección debe llegar también a ese
 // contenido, se escribe aquí: cada ajuste se aplica una sola vez, deja copia en historial/ y se puede revertir en el panel.
-const AJUSTES = 1;
+const AJUSTES = 2;
 
 function ajustar(array $c): array {
     $hecho = (int)($c['ajustes'] ?? 0);
@@ -70,6 +70,13 @@ function ajustar(array $c): array {
             if ($r && $x['q'] === $q && $x['r'] === 'Se puede colocar en las primeras 48 horas. Si no, se espera hasta las 4 semanas.') $c['mitos'][$i]['r'] = $r;
         }
         if (($c['version'] ?? '') === '1.1' && ($c['fecha'] ?? '') === '2026-10-03') { $c['version'] = $sem['version']; $c['fecha'] = $sem['fecha']; }
+    }
+    if ($hecho < 2) {
+        // Noviembre de 2026: bibliografía ampliada y verificada (la misma del trabajo de titulación).
+        // Solo se cambia si la lista publicada es la original; una lista editada por la administradora se respeta.
+        $actual = sha1(json_encode($c['refs'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        if ($actual === '263a4e2fbc8855b06b6929f8adec63fc847fc825') $c['refs'] = $sem['refs'];
+        if (($c['version'] ?? '') === '1.2' && ($c['fecha'] ?? '') === '2026-11-15') $c['version'] = $sem['version'];
     }
     $c['ajustes'] = AJUSTES;
     return $c;

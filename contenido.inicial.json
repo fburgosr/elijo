@@ -1,5 +1,5 @@
 {
- "version": "1.2",
+ "version": "1.3",
  "fecha": "2026-11-15",
  "metodos": [
   {
@@ -298,64 +298,160 @@
  ],
  "refs": [
   [
-   "Organización Mundial de la Salud. Medical eligibility criteria for contraceptive use, 6.ª ed. y anexo web. Ginebra: OMS; 2025.",
-   "https://www.who.int/publications/i/item/B09597"
+   "World Health Organization. Medical eligibility criteria for contraceptive use. 6th ed. Geneva: WHO; 2025.",
+   "https://iris.who.int/handle/10665/383293"
   ],
   [
-   "Organización Mundial de la Salud y Johns Hopkins. Family Planning: A Global Handbook for Providers, 4.ª ed. 2022.",
+   "World Health Organization, Johns Hopkins Bloomberg School of Public Health. Family planning: a global handbook for providers. 4th ed. Geneva: WHO; 2022.",
    "https://fphandbook.org/"
   ],
   [
-   "Organización Mundial de la Salud. WHO recommendations on maternal and newborn care for a positive postnatal experience. Ginebra: OMS; 2022.",
+   "World Health Organization. WHO recommendations on maternal and newborn care for a positive postnatal experience. Geneva: WHO; 2022.",
    "https://www.who.int/publications/i/item/9789240045989"
   ],
   [
-   "Nguyen AT, Curtis KM, Tepper NK, et al. U.S. Medical Eligibility Criteria for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-4):1-126.",
-   "https://www.cdc.gov/mmwr/volumes/73/rr/rr7304a1.htm"
-  ],
-  [
-   "Curtis KM, Nguyen AT, Tepper NK, et al. U.S. Selected Practice Recommendations for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-3):1-77.",
-   "https://www.cdc.gov/mmwr/volumes/73/rr/rr7303a1.htm"
-  ],
-  [
-   "Sze YY, Berendes S, Russel S, et al. Digital health interventions on postpartum contraception use: systematic review. BMJ Sex Reprod Health. 2023;49(1):50-59.",
-   "https://pubmed.ncbi.nlm.nih.gov/36307185/"
-  ],
-  [
-   "Goueth RC, Maki KG, Babatunde A, et al. Technology-based contraceptive decision aids: systematic review and meta-analysis. Am J Obstet Gynecol. 2022;227(5):705-713.",
-   "https://pmc.ncbi.nlm.nih.gov/articles/PMC9800645"
-  ],
-  [
-   "Cunalata Fajardo NJ, Tito Cañamar EM. Uso de métodos anticonceptivos en zonas rurales: una revisión mediante la literatura científica. Ciencia y Educación. 2025;6(6.1):761-776.",
-   "https://zenodo.org/records/17089075"
-  ],
-  [
-   "Ministerio de Salud Pública del Ecuador. Política Nacional de Salud Sexual y Salud Reproductiva 2026-2030. Acuerdo Ministerial 00007-2026.",
+   "Ministerio de Salud Pública del Ecuador. Política Nacional de Salud Sexual y Salud Reproductiva 2026-2030. Acuerdo Ministerial 00007-2026. Registro Oficial, Tercer Suplemento 307; 17 de junio de 2026.",
    "https://www.registroficial.gob.ec/tercer-suplemento-no-307/"
   ],
   [
-   "Ministerio de Salud Pública del Ecuador. Atención integral a niñas y adolescentes embarazadas menores de 15 años. Manual. Acuerdo Ministerial 00066-2022.",
-   "https://www.salud.gob.ec/wp-content/uploads/2023/01/AC-00066-2022-Manual_compressed_compressed.pdf"
+   "Instituto Nacional de Estadística y Censos. Registros estadísticos de nacidos vivos y defunciones fetales 2024. Quito: INEC; 2025.",
+   "https://www.ecuadorencifras.gob.ec/nacidos-vivos-y-defunciones-fetales/"
   ],
   [
-   "Ministerio de Salud Pública del Ecuador. Instructivo del Reglamento para regular el acceso a métodos anticonceptivos, Acuerdo Ministerial 2490. 2014. Norma operativa anterior a 2022.",
-   "https://www.salud.gob.ec/wp-content/uploads/2023/01/Instructivo_de_implementacion_del_acuerdo_ministerial_2490_aprobado.pdf"
+   "Ministerio de Salud Pública del Ecuador. Gaceta de muerte materna, año 2024. Quito: MSP; 2025.",
+   "https://www.salud.gob.ec/wp-content/uploads/2025/11/Gaceta-MM-ANO-2024-final-1.pdf"
   ],
   [
-   "Dey T, Bassiony N, Hancock A, et al. Critical signs and symptoms for self-assessment in the immediate postnatal period: systematic scoping review and Delphi consensus. BMC Pregnancy Childbirth. 2025;25(1):364.",
-   "https://doi.org/10.1186/s12884-025-07472-9"
+   "Instituto Nacional de Estadística y Censos. Registros estadísticos de nacidos vivos y defunciones fetales 2025. Quito: INEC; 2026.",
+   "https://www.ecuadorencifras.gob.ec/documentos/web-inec/Poblacion_y_Demografia/Nacimientos_Defunciones/2025/ENV_EDF_2025.pdf"
   ],
   [
-   "Instituto Nacional de Estadística y Censos. Registros Estadísticos de Nacidos Vivos y Defunciones Fetales 2024. Quito: INEC; 2025.",
-   "https://www.ecuadorencifras.gob.ec/documentos/web-inec/Poblacion_y_Demografia/Nacimientos_Defunciones/2024/ENV_EDF_2024.pdf"
+   "Ministerio de Salud Pública del Ecuador. Gaceta epidemiológica de muerte materna, semana epidemiológica 53, Ecuador 2025. Quito: MSP; 2026.",
+   "https://www.salud.gob.ec/wp-content/uploads/2026/01/Gaceta-MM-2025-SE-53.pdf"
   ],
   [
-   "Khurram J, Lal A, Rahim A, Tikmani SS. Prevalence of postpartum family planning uptake and its association with spousal discussion, joint decision-making and partner approval. BMJ Open. 2025;15.",
+   "Instituto Nacional de Estadística y Censos. Encuesta Nacional sobre Desnutrición Infantil (ENDI), segunda ronda, julio 2023 a agosto 2024. Quito: INEC; 2024.",
+   "https://www.ecuadorencifras.gob.ec/documentos/web-inec/ENDI/R2/Presentacion_publicacion_ENDI_R2.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Plan Sectorial de Salud 2025-2029. Quito: MSP; 2025.",
+   "https://www.salud.gob.ec/wp-content/uploads/2026/04/0.-PLAN-SECTORIAL-SALUD_2025-2029_.pdf"
+  ],
+  [
+   "Khurram J, Lal A, Rahim A, Tikmani SS. Prevalence of postpartum family planning uptake and its association with spousal discussion, joint decision-making and partner approval: a systematic review and meta-analysis. BMJ Open. 2025;15(9):e094628.",
    "https://doi.org/10.1136/bmjopen-2024-094628"
   ],
   [
-   "Wang Y, Zeng C, Chen Y, et al. Short interpregnancy interval can lead to adverse pregnancy outcomes: a meta-analysis. Front Med. 2022;9:922053.",
+   "Dev R, Kohler P, Feder M, Unger JA, Woods NF, Drake AL. A systematic review and meta-analysis of postpartum contraceptive use among women in low- and middle-income countries. Reprod Health. 2019;16(1):154.",
+   "https://doi.org/10.1186/s12978-019-0824-4"
+  ],
+  [
+   "Gadea-Rivera MA, Arnao-Degollar VA, Santos-Rosales Y. Factores asociados al rechazo de contracepción posparto en un hospital público. Rev Obstet Ginecol Venez. 2024;84(3):307-315.",
+   "https://doi.org/10.51288/00840312"
+  ],
+  [
+   "Cunalata Fajardo NJ, Tito Cañamar EM. Uso de métodos anticonceptivos en zonas rurales: una revisión mediante la literatura científica. Ciencia y Educación. 2025;6(6.1):761-776.",
+   "https://doi.org/10.5281/zenodo.17089075"
+  ],
+  [
+   "Sze YY, Berendes S, Russel S, Bellam L, Smith C, Cameron S, et al. A systematic review of randomised controlled trials of the effects of digital health interventions on postpartum contraception use. BMJ Sex Reprod Health. 2023;49(1):50-59.",
+   "https://doi.org/10.1136/bmjsrh-2022-201468"
+  ],
+  [
+   "Goueth RC, Maki KG, Babatunde A, Eden KB, Darney BG. Effects of technology-based contraceptive decision aids: a systematic review and meta-analysis. Am J Obstet Gynecol. 2022;227(5):705-713.e9.",
+   "https://doi.org/10.1016/j.ajog.2022.06.050"
+  ],
+  [
+   "Castillo Yam MZG, Ayón Aguilar J, Cerón Cruz AD, Mengual Ku AJ. Aceptación de anticoncepción en el puerperio inmediato: impacto de una intervención educativa en mujeres mexicanas. Ciencia Latina. 2025;9(5):11770-11781.",
+   "https://doi.org/10.37811/cl_rcm.v9i5.20464"
+  ],
+  [
+   "Sileo KM, Wanyenze RK, Lule H, Kiene SM. Determinants of family planning service uptake and use of contraceptives among postpartum women in rural Uganda. Int J Public Health. 2015;60(8):987-997.",
+   "https://doi.org/10.1007/s00038-015-0683-x"
+  ],
+  [
+   "Mahande MJ, Shayo E, Amour C, Mshana G, Msuya S. Factors associated with modern contraceptives use among postpartum women in Bukombe District, Geita region, Tanzania. PLoS One. 2020;15(10):e0239903.",
+   "https://doi.org/10.1371/journal.pone.0239903"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Política Intersectorial para el Abordaje Integral del Embarazo en Adolescentes 2026-2035. Acuerdo Interinstitucional 00002-2025. Registro Oficial, Suplemento 191; 24 de diciembre de 2025.",
+   "https://esacc.corteconstitucional.gob.ec/storage/api/v1/10_DWL_FL/eyJjYXJwZXRhIjoicm8iLCJ1dWlkIjoiMWFhNGMxNGYtODFjMS00YjRhLThkMWEtZTI2NGZlOTA3ZWE4LnBkZiJ9"
+  ],
+  [
+   "Curtis KM, Nguyen AT, Tepper NK, Zapata LB, Snyder EM, Hatfield-Timajchy K, et al. U.S. Selected Practice Recommendations for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-3):1-77.",
+   "https://doi.org/10.15585/mmwr.rr7303a1"
+  ],
+  [
+   "World Health Organization. Ensuring human rights in the provision of contraceptive information and services: guidance and recommendations. Geneva: WHO; 2014.",
+   "https://www.who.int/publications/i/item/9789241506748"
+  ],
+  [
+   "Wang Y, Zeng C, Chen Y, Yang L, Tian D, Liu X, et al. Short interpregnancy interval can lead to adverse pregnancy outcomes: a meta-analysis. Front Med. 2022;9:922053.",
    "https://doi.org/10.3389/fmed.2022.922053"
+  ],
+  [
+   "Nguyen AT, Curtis KM, Tepper NK, Kortsmit K, Brittain AW, Snyder EM, et al. U.S. Medical Eligibility Criteria for Contraceptive Use, 2024. MMWR Recomm Rep. 2024;73(RR-4):1-126.",
+   "https://doi.org/10.15585/mmwr.rr7304a1"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Asesoría en salud sexual y reproductiva. Manual. 1.ª ed. Quito: Dirección Nacional de Promoción de la Salud, MSP; 2017.",
+   "https://ecuador.unfpa.org/sites/default/files/pub-pdf/7503%20asesoria%20ss.pdf"
+  ],
+  [
+   "Asamblea Constituyente del Ecuador. Constitución de la República del Ecuador. Registro Oficial 449; 20 de octubre de 2008.",
+   "https://www.asambleanacional.gob.ec/sites/default/files/documents/old/constitucion_de_bolsillo.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Reglamento para regular el acceso a métodos anticonceptivos. Acuerdo Ministerial 2490. Registro Oficial 919; 25 de marzo de 2013, reformado el 4 de agosto de 2014.",
+   "https://www.controlsanitario.gob.ec/wp-content/uploads/downloads/2019/01/Acuerdo-Ministerial-2490.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Instructivo de implementación del Reglamento para regular el acceso a métodos anticonceptivos, Acuerdo Ministerial 2490. Quito: MSP; 2014.",
+   "https://www.salud.gob.ec/wp-content/uploads/2023/01/Instructivo_de_implementacion_del_acuerdo_ministerial_2490_aprobado.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Atención integral a niñas y adolescentes embarazadas menores de 15 años de edad. Manual. Acuerdo Ministerial 00066-2022, Registro Oficial 224 de 6 de enero de 2023. Quito: MSP; 2022.",
+   "https://www.salud.gob.ec/wp-content/uploads/2023/01/AC-00066-2022-Manual_compressed_compressed.pdf"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Estándares de calidad en la atención de los servicios de salud sexual y salud reproductiva para adolescentes. Instructivo. Acuerdo Ministerial 00001-2026. Registro Oficial, Suplemento 353; 24 de agosto de 2026.",
+   "https://esacc.corteconstitucional.gob.ec/storage/api/v1/10_DWL_FL/eyJjYXJwZXRhIjoicm8iLCJ1dWlkIjoiODI4YjQ5OTMtNWRhZS00ZGZkLWI4OWMtMWE0YTQyYzRiMTNmLnBkZiJ9"
+  ],
+  [
+   "Stacey D, Lewis KB, Smith M, Carley M, Volk R, Douglas EE, et al. Decision aids for people facing health treatment or screening decisions. Cochrane Database Syst Rev. 2024;1(1):CD001431.",
+   "https://doi.org/10.1002/14651858.cd001431.pub6"
+  ],
+  [
+   "Perinpanathan T, Maiya S, van Velthoven MHH, Nguyen AT, Free C, Smith C. Mobile phone-based interventions for improving contraception use. Cochrane Database Syst Rev. 2023;7(7):CD011159.",
+   "https://doi.org/10.1002/14651858.cd011159.pub3"
+  ],
+  [
+   "Ministerio de Salud Pública del Ecuador. Política Nacional para la Reducción de la Morbi-Mortalidad Materna y Neonatal 2026-2035. Acuerdo Ministerial 00011-2026. Registro Oficial, Segundo Suplemento 330; 21 de julio de 2026.",
+   "https://esacc.corteconstitucional.gob.ec/storage/api/v1/10_DWL_FL/eyJjYXJwZXRhIjoicm8iLCJ1dWlkIjoiODkwOGRmMWQtYmM2NC00ZDE2LWJiYjAtMjE1YzBhNjhkMjZmLnBkZiJ9"
+  ],
+  [
+   "Asamblea Nacional del Ecuador. Ley Orgánica de Protección de Datos Personales. Registro Oficial, Quinto Suplemento 459; 26 de mayo de 2021.",
+   "https://www.telecomunicaciones.gob.ec/wp-content/uploads/2021/06/Ley-Organica-de-Datos-Personales.pdf"
+  ],
+  [
+   "Asamblea Nacional del Ecuador. Ley Orgánica para el Fortalecimiento de la Ciberseguridad. Registro Oficial, Quinto Suplemento 290; 22 de mayo de 2026.",
+   "https://esacc.corteconstitucional.gob.ec/storage/api/v1/10_DWL_FL/eyJjYXJwZXRhIjoicm8iLCJ1dWlkIjoiYTU2YzBiOTQtNzU3ZC00YzQ3LTk2NTItMTJiNjFkZGZiMDQzLnBkZiJ9"
+  ],
+  [
+   "Dey T, Bassiony N, Hancock A, Benova L, Mathai M, Langlois EV, et al. Critical signs and symptoms for self-assessment in the immediate postnatal period: an international systematic scoping review and Delphi consensus study. BMC Pregnancy Childbirth. 2025;25(1):364.",
+   "https://doi.org/10.1186/s12884-025-07472-9"
+  ],
+  [
+   "Jatlaoui TC, Whiteman MK, Jeng G, Tepper NK, Berry-Bibee E, Jamieson DJ, et al. Intrauterine device expulsion after postpartum placement: a systematic review and meta-analysis. Obstet Gynecol. 2018;132(4):895-905.",
+   "https://doi.org/10.1097/aog.0000000000002822"
+  ],
+  [
+   "Averbach SH, Ermias Y, Jeng G, Curtis KM, Whiteman MK, Berry-Bibee E, et al. Expulsion of intrauterine devices after postpartum placement by timing of placement, delivery type, and intrauterine device type: a systematic review and meta-analysis. Am J Obstet Gynecol. 2020;223(2):177-188.",
+   "https://doi.org/10.1016/j.ajog.2020.02.045"
+  ],
+  [
+   "Lopez LM, Bernholc A, Hubacher D, Stuart G, Van Vliet HA. Immediate postpartum insertion of intrauterine device for contraception. Cochrane Database Syst Rev. 2015;(6):CD003036.",
+   "https://doi.org/10.1002/14651858.cd003036.pub3"
   ]
  ],
  "datos": [
